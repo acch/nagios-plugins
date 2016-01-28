@@ -27,31 +27,47 @@
 # Name:               Check OpenVZ Memory
 # Author:             Achim Christ - achim(dot)christ(at)gmail(dot)com
 # Version:            1.0
-# Dependencies:       none
+# Dependencies:       bc
 # Website:            https://github.com/acch/nagios-plugins
 
-# This bash script checks memory usage of an OpenVZ container, and warns if it exceeds the amount of 'guaranteed RAM'.
+# This bash script reports on and checks memory usage of an OpenVZ container, and warns if it exceeds the amount of 'guaranteed RAM'.
 
 # The actual code is managed in the following GitHub rebository - please use the Issue Tracker to ask questions, report problems or request enhancements.
 # https://github.com/acch/nagios-plugins
 
 # Disclaimer: This sample is provided 'as is', without any warranty or support. It is provided solely for demonstrative purposes - the end user must test and modify this sample to suit his or her particular environment. This code is provided for your convenience, only - though being tested, there's no guarantee that it doesn't seriously break things in your environment! If you decide to run it, you do so on your own risk!
 
+# Read memory information from Kernel
 mem_actual=$(grep privvmpages /proc/user_beancounters | awk '{print $3}')
 mem_warn=$(grep vmguarpages /proc/user_beancounters | awk '{print $4}')
 mem_crit=$(grep privvmpages /proc/user_beancounters | awk '{print $4}')
 mem_max=$(grep privvmpages /proc/user_beancounters | awk '{print $5}')
 
-if [ $mem_actual -gt $mem_warn ]; then retcode=1; msg="WARNING";
-elif [ $mem_actual -gt $mem_crit ]; then retcode=2; msg="CRITICAL";
-else retcode=0; msg="OK";
+# Check for warnings
+if [ $mem_actual -gt $mem_warn ]
+then
+  # Memory above warning threshold
+  retcode=1
+  msg="WARNING"
+# Check for errors
+elif [ $mem_actual -gt $mem_crit ]
+then
+  # Memory above critical threshold
+  retcode=2
+  msg="CRITICAL"
+# Everything's fine
+else
+  # Memory below thresholds
+  retcode=0
+  msg="OK"
 fi
 
+# Compute 'performance' data
 mem_actual_mb=$(echo "scale=3; $mem_actual/250" | bc)
 mem_warn_mb=$(echo "scale=3; $mem_warn/250" | bc)
 mem_crit_mb=$(echo "scale=3; $mem_crit/250" | bc)
 mem_max_mb=$(echo "scale=3; $mem_max/250" | bc)
 
+# Produce Nagios output
 echo "MEMORY $msg - ${mem_actual_mb}MB used currently | memused=${mem_actual_mb}MB;${mem_warn_mb};${mem_crit_mb};0;${mem_max_mb}"
-
 exit $retcode
