@@ -1,24 +1,32 @@
 #!/bin/bash
 
-###############################################################################
-# Copyright 2012 Achim Christ                                                 #
-#                                                                             #
-#   Licensed under the Apache License, Version 2.0 (the "License");           #
-#   you may not use this file except in compliance with the License.          #
-#   You may obtain a copy of the License at                                   #
-#                                                                             #
-#       http://www.apache.org/licenses/LICENSE-2.0                            #
-#                                                                             #
-#   Unless required by applicable law or agreed to in writing, software       #
-#   distributed under the License is distributed on an "AS IS" BASIS,         #
-#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  #
-#   See the License for the specific language governing permissions and       #
-#   limitations under the License.                                            #
-###############################################################################
+################################################################################
+# The MIT License (MIT)                                                        #
+#                                                                              #
+# Copyright (c) 2012 Achim Christ                                              #
+#                                                                              #
+# Permission is hereby granted, free of charge, to any person obtaining a copy #
+# of this software and associated documentation files (the "Software"), to deal#
+# in the Software without restriction, including without limitation the rights #
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell    #
+# copies of the Software, and to permit persons to whom the Software is        #
+# furnished to do so, subject to the following conditions:                     #
+#                                                                              #
+# The above copyright notice and this permission notice shall be included in   #
+# all copies or substantial portions of the Software.                          #
+#                                                                              #
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR   #
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,     #
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE  #
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER       #
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,#
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE#
+# SOFTWARE.                                                                    #
+################################################################################
 
 # Name:		Check IBM Storwize V7000 Unified / SONAS
 # Author:	Achim Christ - achim(dot)christ(at)gmail(dot)com
-# Version:	1.0
+# Version:	1.1
 # Dependencies:	openssh
 
 # This bash script checks health of an IBM Storwize V7000 Unified / SONAS system, using the 'lshealth' CLI command.
@@ -41,28 +49,27 @@
 #     command_line    /path/to/check_ifs.sh -H $HOSTADDRESS$ -u $ARG1$ -m $ARG2$
 #   }
 #   define service{
-#     use			generic-service
-#     host_name			<your_system>
+#     use             generic-service
+#     host_name       <your_system>
 #     service_description	PING
-#     check_command		check_ping!100.0,20%!500.0,60%
+#     check_command   check_ping!100.0,20%!500.0,60%
 #   }
 #   define service{
-#     use			generic-service
-#     host_name			<your_system>
+#     use             generic-service
+#     host_name       <your_system>
 #     service_description	BLOCK
-#     check_command		check_ifs!nagios!b
+#     check_command   check_ifs!nagios!b
 #   }
 #   define service{
-#     use			generic-service
-#     host_name			<your_system>
+#     use             generic-service
+#     host_name       <your_system>
 #     service_description	FILE
-#     check_command		check_ifs!nagios!f
+#     check_command   check_ifs!nagios!f
 #   }
-
 
 # Version History:
-# 1.0		7.12.2012	Initial Release
-#
+# 1.0    7.12.2012   Initial Release
+# 1.1    28.1.2016   Changed to MIT license, add ConnectTimeout SSH parameter
 
 #####################
 ### Configuration ###
@@ -115,6 +122,7 @@ rsh="/usr/bin/ssh \
   -o PasswordAuthentication=no \
   -o PubkeyAuthentication=yes \
   -o StrictHostKeyChecking=no \
+  -o ConnectTimeout=10 \
   -i $identity_file \
   $username@$hostaddress"
 
@@ -202,10 +210,9 @@ case "$mode" in
     rm $tmp_file
   ;;
   # Check not implemented
-  *) error_usage ;; 
+  *) error_usage ;;
 esac
 
 # Produce Nagios output
 echo $return_message
 exit $return_code
-
