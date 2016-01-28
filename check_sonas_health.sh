@@ -33,6 +33,9 @@
 # This bash script checks health of an IBM Storwize V7000 Unified / SONAS system, using the 'lshealth' CLI command.
 # It allows checking health of the system's front-end "FILE" component (both, Storwize V7000 Unified and SONAS), as well as health of the back-end "BLOCK" component (Storwize V7000 Unified, only - does not work with SONAS). The component to check is determined by the '-m' parameter: '-m f' checks health of the FILE component, '-m b' checks health of the BLOCK component.
 
+# The actual code is managed in the following GitHub rebository - please use the Issue Tracker to ask questions, report problems or request enhancements.
+# https://github.com/acch/nagios-plugins
+
 # Disclaimer: This sample is provided 'as is', without any warranty or support. It is provided solely for demonstrative purposes - the end user must test and modify this sample to suit his or her particular environment. This code is provided for your convenience, only - though being tested, there's no guarantee that it doesn't seriously break things in your environment! If you decide to run it, you do so on your own risk!
 
 # The script requires SSH Public Key Authentication for connecting to the Storwize V7000 Unified / SONAS system. SSH Public Key Authentication needs to be set up first, before running the script. To test your SSH configuration, try to login to Storwize V7000 Unified / SONAS via SSH from the Nagios server as the Nagios user - if this works without prompting you for a password you seem to have properly configured Public Key Authentication. If you get a "Permission denied" error when running the script, the most likely reason for that is Public Key Authentication not being configured correctly for the Nagios user (by default called 'nagios').
