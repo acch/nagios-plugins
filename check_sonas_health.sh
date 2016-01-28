@@ -46,8 +46,8 @@
 
 # You may want to define the following Nagios constructs to use this script:
 #   define command{
-#     command_name    check_ifs
-#     command_line    /path/to/check_ifs.sh -H $HOSTADDRESS$ -u $ARG1$ -m $ARG2$
+#     command_name    check_sonas_health
+#     command_line    /path/to/check_sonas_health.sh -H $HOSTADDRESS$ -u $ARG1$ -m $ARG2$
 #   }
 #   define service{
 #     use             generic-service
@@ -59,13 +59,13 @@
 #     use             generic-service
 #     host_name       <your_system>
 #     service_description	BLOCK
-#     check_command   check_ifs!nagios!b
+#     check_command   check_sonas_health!nagios!b
 #   }
 #   define service{
 #     use             generic-service
 #     host_name       <your_system>
 #     service_description	FILE
-#     check_command   check_ifs!nagios!f
+#     check_command   check_sonas_health!nagios!f
 #   }
 
 # Version History:
@@ -82,7 +82,7 @@
 identity_file="$HOME/.ssh/id_rsa" # Be sure this is readable by Nagios user!
 
 # Path to a temporary file holding the remote command output while it is being parsed by the script:
-tmp_file="/tmp/check_ifs_$RANDOM.tmp" # Be sure this is writable by Nagios user!
+tmp_file="/tmp/check_sonas_health_$RANDOM.tmp" # Be sure this is writable by Nagios user!
 
 ####################################
 ### Do not edit below this line! ###
