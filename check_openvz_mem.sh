@@ -43,18 +43,18 @@ mem_warn=$(grep vmguarpages /proc/user_beancounters | awk '{print $4}')
 mem_crit=$(grep privvmpages /proc/user_beancounters | awk '{print $4}')
 mem_max=$(grep privvmpages /proc/user_beancounters | awk '{print $5}')
 
-# Check for warnings
-if [ $mem_actual -gt $mem_warn ]
-then
-  # Memory above warning threshold
-  retcode=1
-  msg="WARNING"
 # Check for errors
-elif [ $mem_actual -gt $mem_crit ]
+if [ $mem_actual -gt $mem_crit ]
 then
   # Memory above critical threshold
   retcode=2
   msg="CRITICAL"
+# Check for warnings
+elif [ $mem_actual -gt $mem_warn ]
+then
+  # Memory above warning threshold
+  retcode=1
+  msg="WARNING"
 # Everything's fine
 else
   # Memory below thresholds
