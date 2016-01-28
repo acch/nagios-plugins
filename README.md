@@ -1,4 +1,4 @@
-# nagios-plugins
+# Nagios-Plugins
 Collection of Nagios / Icinga plugins. All checks posted and listed on https://exchange.nagios.org.
 
 Please use the [Issue Tracker](https://github.com/acch/nagios-plugins/issues) to ask questions, report problems or request enhancements.
