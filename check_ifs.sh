@@ -24,10 +24,11 @@
 # SOFTWARE.                                                                    #
 ################################################################################
 
-# Name:		Check IBM Storwize V7000 Unified / SONAS
-# Author:	Achim Christ - achim(dot)christ(at)gmail(dot)com
-# Version:	1.1
-# Dependencies:	openssh
+# Name:               Check IBM Storwize V7000 Unified / SONAS
+# Author:             Achim Christ - achim(dot)christ(at)gmail(dot)com
+# Version:            1.1
+# Dependencies:       openssh
+# Website:            https://github.com/acch/nagios-plugins
 
 # This bash script checks health of an IBM Storwize V7000 Unified / SONAS system, using the 'lshealth' CLI command.
 # It allows checking health of the system's front-end "FILE" component (both, Storwize V7000 Unified and SONAS), as well as health of the back-end "BLOCK" component (Storwize V7000 Unified, only - does not work with SONAS). The component to check is determined by the '-m' parameter: '-m f' checks health of the FILE component, '-m b' checks health of the BLOCK component.
