@@ -27,10 +27,12 @@
 # Name:               Check OpenVZ Memory
 # Author:             Achim Christ - achim(dot)christ(at)gmail(dot)com
 # Version:            1.0
-# Dependencies:       bc
+# Dependencies:       bc - An arbitrary precision calculator language
 # Website:            https://github.com/acch/nagios-plugins
 
-# This bash script reports on and checks memory usage of an OpenVZ container, and warns if it exceeds the amount of 'guaranteed RAM'.
+# OpenVZ Linux containers have a notion of 'guaranteed memory' which is typically lower than the total amount of memory available.
+# Since memory is shared among containers, allocating more than the guaranteed amount may eventually fail. This typically results in transient errors which are extremely hard to identify.
+# This bash script reports on and checks memory usage of an OpenVZ container, and warns if it exceeds the amount of guaranteed memory.
 
 # The actual code is managed in the following GitHub rebository - please use the Issue Tracker to ask questions, report problems or request enhancements.
 # https://github.com/acch/nagios-plugins
