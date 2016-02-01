@@ -27,7 +27,7 @@
 # Name:               Check IBM Storwize V7000 Unified / SONAS
 # Author:             Achim Christ - achim(dot)christ(at)gmail(dot)com
 # Version:            1.1
-# Dependencies:       openssh
+# Dependencies:       openssh - OpenSSH SSH client (remote login program)
 # Website:            https://github.com/acch/nagios-plugins
 
 # This bash script checks health of an IBM Storwize V7000 Unified / SONAS system, using the 'lshealth' CLI command.
@@ -53,19 +53,11 @@
 #     command_line    /path/to/check_sonas_health.sh -H $HOSTADDRESS$ -u $ARG1$ -m $ARG2$
 #   }
 #   define service{
-#     use             generic-service
-#     host_name       <your_system>
-#     service_description	PING
-#     check_command   check_ping!100.0,20%!500.0,60%
-#   }
-#   define service{
-#     use             generic-service
 #     host_name       <your_system>
 #     service_description	BLOCK
 #     check_command   check_sonas_health!nagios!b
 #   }
 #   define service{
-#     use             generic-service
 #     host_name       <your_system>
 #     service_description	FILE
 #     check_command   check_sonas_health!nagios!f
