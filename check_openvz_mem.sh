@@ -34,6 +34,9 @@
 # Since memory is shared among containers, allocating more than the guaranteed amount may eventually fail. This typically results in transient errors which are extremely hard to identify.
 # This bash script reports on and checks memory usage of an OpenVZ container, and warns if it exceeds the amount of guaranteed memory.
 
+# Additional detail on the monitored parameters can be found here:
+# http://wiki.openvz.org/UBC_primary_parameters#vmguarpages
+
 # The actual code is managed in the following GitHub rebository - please use the Issue Tracker to ask questions, report problems or request enhancements.
 # https://github.com/acch/nagios-plugins
 
