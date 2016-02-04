@@ -35,15 +35,15 @@
 # This bash script reports on and checks memory usage of an OpenVZ container, and warns if it exceeds the amount of guaranteed memory.
 
 # Additional detail on the monitored parameters can be found here:
-# http://wiki.openvz.org/UBC_primary_parameters#vmguarpages
+#   http://wiki.openvz.org/UBC_primary_parameters#vmguarpages
 
 # The actual code is managed in the following GitHub rebository - please use the Issue Tracker to ask questions, report problems or request enhancements.
-# https://github.com/acch/nagios-plugins
+#   https://github.com/acch/nagios-plugins
 
 # Disclaimer: This sample is provided 'as is', without any warranty or support. It is provided solely for demonstrative purposes - the end user must test and modify this sample to suit his or her particular environment. This code is provided for your convenience, only - though being tested, there's no guarantee that it doesn't seriously break things in your environment! If you decide to run it, you do so on your own risk!
 
 # Version History:
-# 1.0    4.02.2016   Initial Release
+# 1.0    4.02.2016    Initial Release
 
 # Read memory information from Kernel
 mem_actual=$(grep privvmpages /proc/user_beancounters | awk '{print $3}')
