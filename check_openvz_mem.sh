@@ -42,6 +42,9 @@
 
 # Disclaimer: This sample is provided 'as is', without any warranty or support. It is provided solely for demonstrative purposes - the end user must test and modify this sample to suit his or her particular environment. This code is provided for your convenience, only - though being tested, there's no guarantee that it doesn't seriously break things in your environment! If you decide to run it, you do so on your own risk!
 
+# Version History:
+# 1.0    4.02.2016   Initial Release
+
 # Read memory information from Kernel
 mem_actual=$(grep privvmpages /proc/user_beancounters | awk '{print $3}')
 mem_warn=$(grep vmguarpages /proc/user_beancounters | awk '{print $4}')
