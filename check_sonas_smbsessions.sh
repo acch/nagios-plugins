@@ -56,7 +56,7 @@
 #   }
 
 # Version History:
-# 1.0    10.02.2016    Initial Release
+# 1.0    10.2.2016    Initial Release
 
 #####################
 ### Configuration ###
