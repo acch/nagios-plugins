@@ -46,8 +46,7 @@
 # 1.0    4.2.2016     Initial Release
 # 1.1    10.2.2016    Added check for dependencies
 
-# Check for Dependencies
-
+# Check for dependencies
 if [ ! -x /usr/bin/bc ]
 then
   echo "'bc' not found - please install it!"

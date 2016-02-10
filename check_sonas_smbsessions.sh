@@ -104,7 +104,7 @@ while getopts 'H:u:' OPT; do
   esac
 done
 
-# Check for Dependencies
+# Check for dependencies
 if [ ! -x /usr/bin/ssh ]
 then
   echo "'openssh' not found - please install it!"
