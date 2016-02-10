@@ -54,12 +54,12 @@
 #   }
 #   define service{
 #     host_name       <your_system>
-#     service_description	BLOCK
+#     service_description	BLOCK Health
 #     check_command   check_sonas_health!nagios!b
 #   }
 #   define service{
 #     host_name       <your_system>
-#     service_description	FILE
+#     service_description	FILE Health
 #     check_command   check_sonas_health!nagios!f
 #   }
 
@@ -95,7 +95,7 @@ error_login () {
 }
 
 error_response () {
-  echo "Error parsing remote command output: $1"
+  echo "Error parsing remote command output: $*"
   rm $tmp_file
   exit 3
 }
@@ -112,6 +112,13 @@ while getopts 'H:u:m:' OPT; do
     *) error_usage ;;
   esac
 done
+
+# Check for Dependencies
+if [ ! -x /usr/bin/ssh ]
+then
+  echo "'openssh' not found - please install it!"
+  exit 3
+fi
 
 # Compile SSH command using commandline options
 rsh="/usr/bin/ssh \

@@ -45,6 +45,14 @@
 # Version History:
 # 1.0    4.02.2016    Initial Release
 
+# Check for Dependencies
+
+if [ ! -x /usr/bin/bc ]
+then
+  echo "'bc' not found - please install it!"
+  exit 3
+fi
+
 # Read memory information from Kernel
 mem_actual=$(grep privvmpages /proc/user_beancounters | awk '{print $3}')
 mem_warn=$(grep vmguarpages /proc/user_beancounters | awk '{print $4}')
