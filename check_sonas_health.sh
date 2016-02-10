@@ -24,7 +24,7 @@
 # SOFTWARE.                                                                    #
 ################################################################################
 
-# Name:               Check IBM Storwize V7000 Unified / SONAS
+# Name:               Check IBM Storwize V7000 Unified / SONAS Health
 # Author:             Achim Christ - achim(dot)christ(at)gmail(dot)com
 # Version:            1.1
 # Dependencies:       openssh - OpenSSH SSH client (remote login program)
