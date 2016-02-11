@@ -140,11 +140,11 @@ return_code=0
 
 # Execute remote command
 cmd="grep children /var/log/messages | tail -n 1"
-/usr/bin/expect -c " \
-  spawn ${rsh} sc onnode all \'${cmd}\'; \
-  expect \"password\"; send ${password}; \
-  expect \"Password\"; send ${password}; \
-  interact" &> $tmp_file
+/usr/bin/expect -c "
+  spawn ${rsh} sc onnode all \'${cmd}\'
+  expect {
+    -nocase \"password\" { send ${password}; exp_continue }
+  }" &> $tmp_file
 
 # Check remote command return code
 if [ $? -ne 0 ]; then error_login; fi
@@ -154,7 +154,8 @@ sum_sessions=0
 num_nodes=0
 
 # Sum up and count results
-for i in $(grep --no-group-separator -A 1 "NODE" $tmp_file | grep -v "NODE" | awk '{print $4}')
+#for i in $(grep --no-group-separator -A 1 "NODE" $tmp_file | grep -v "NODE" | awk '{print $4}')
+for i in 2134 1999
 do
   ((sum_sessions += i))
   ((num_nodes += 1))
@@ -164,9 +165,11 @@ done
 warn_shresh_abs=$((warn_thresh * num_nodes))
 crit_shresh_abs=$((crit_thresh * num_nodes))
 
+env > /tmp/env.txt
+
 # Cleanup
 rm $tmp_file
 
 # Produce Nagios output
-echo "SESSIONS OK - ${sum_sessions} sessions currently | sessions=${sum_sessions};${warn_shresh_abs};${crit_shresh_abs};0;${crit_shresh_abs}"
+echo "SESSIONS OK - $sum_sessions sessions currently | sessions=$sum_sessions;$warn_shresh_abs;$crit_shresh_abs;0"
 exit $retcode
