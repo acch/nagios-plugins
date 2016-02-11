@@ -3,7 +3,7 @@
 ################################################################################
 # The MIT License (MIT)                                                        #
 #                                                                              #
-# Copyright (c) 2012 Achim Christ                                              #
+# Copyright (c) 2016 Achim Christ                                              #
 #                                                                              #
 # Permission is hereby granted, free of charge, to any person obtaining a copy #
 # of this software and associated documentation files (the "Software"), to deal#
@@ -56,7 +56,7 @@
 #   }
 
 # Version History:
-# 1.0    10.2.2016    Initial Release
+# 1.0    11.2.2016    Initial Release
 
 #####################
 ### Configuration ###
@@ -109,6 +109,10 @@ while getopts 'H:u:' OPT; do
   esac
 done
 
+#################
+# Sanity checks #
+#################
+
 # Check for dependencies
 if [ ! -x /usr/bin/ssh ]
 then
@@ -119,6 +123,13 @@ fi
 if [ ! -x /usr/bin/expect ]
 then
   echo "'expect' not found - please install it!"
+  exit 3
+fi
+
+# Check if temporary file is writable
+if ! touch $tmp_file 2> /dev/null
+then
+  echo "${tmp_file} is not writable - please adjust its path!"
   exit 3
 fi
 
@@ -155,17 +166,16 @@ sum_sessions=0
 declare -a sessions_per_node
 
 # Parse results
-#for sessions in $(grep --no-group-separator -A 1 "NODE" $tmp_file | grep -v "NODE" | awk '{print $4}')
-for sessions in 2371 1999
+for sessions in $(grep --no-group-separator -A 1 "NODE" $tmp_file | grep -v "NODE" | awk '{print $4}')
 do
   # Count number of nodes
   ((num_nodes += 1))
 
-  # Concatenate performance data per node
-  perfdata="$perfdata node${num_nodes}=$sessions;$warn_thresh;$crit_thresh;0"
-
   # Sum up total sessions
   ((sum_sessions += sessions))
+
+  # Concatenate performance data per node
+  perfdata="$perfdata node${num_nodes}=$sessions;$warn_thresh;$crit_thresh;0;"
 done
 
 # Cleanup
