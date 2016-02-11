@@ -160,30 +160,19 @@ declare -a sessions_per_node
 #for sessions in $(grep --no-group-separator -A 1 "NODE" $tmp_file | grep -v "NODE" | awk '{print $4}')
 for sessions in 2371 1999
 do
-  # Store sessions per node
-  sessions_per_node[$num_nodes]=$sessions
+  # Count number of nodes
+  ((num_nodes += 1))
+
+  # Concatenate performance data per node
+  perfdata="$perfdata node${num_nodes}=$sessions;$warn_thresh;$crit_thresh;0"
 
   # Sum up total sessions
   ((sum_sessions += sessions))
-
-  # Count number of nodes
-  ((num_nodes += 1))
-done
-
-# Initialize counter
-i=0
-
-# Compute performance data per node
-for sessions in "${sessions_per_node[@]}"
-do
-  # Concatenate performance data
-  ((i += 1))
-  perfdata="$perfdata node${i}=$sessions;$warn_thresh;$crit_thresh;0"
 done
 
 # Cleanup
 rm $tmp_file
 
 # Produce Nagios output
-echo "SESSIONS OK - $sum_sessions sessions currently | $perfdata"
+echo "SESSIONS OK - $sum_sessions sessions currently |$perfdata"
 exit $retcode
