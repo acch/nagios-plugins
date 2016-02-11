@@ -54,12 +54,12 @@
 #   }
 #   define service{
 #     host_name       <your_system>
-#     service_description	BLOCK Health
+#     service_description BLOCK Health
 #     check_command   check_sonas_health!nagios!b
 #   }
 #   define service{
 #     host_name       <your_system>
-#     service_description	FILE Health
+#     service_description FILE Health
 #     check_command   check_sonas_health!nagios!f
 #   }
 
