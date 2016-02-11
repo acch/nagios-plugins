@@ -163,7 +163,6 @@ if [ $? -ne 0 ]; then error_login; fi
 # Initialize counter and array
 num_nodes=0
 sum_sessions=0
-declare -a sessions_per_node
 
 # Parse results
 for sessions in $(grep --no-group-separator -A 1 "NODE" $tmp_file | grep -v "NODE" | awk '{print $4}')
