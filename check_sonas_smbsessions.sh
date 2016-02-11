@@ -62,6 +62,8 @@
 ### Configuration ###
 #####################
 
+env > /tmp/env.txt
+
 # Warning threshold (number of sessions per node)
 warn_thresh=2000
 # Critical threshold (number of sessions per node)
@@ -149,27 +151,39 @@ cmd="grep children /var/log/messages | tail -n 1"
 # Check remote command return code
 if [ $? -ne 0 ]; then error_login; fi
 
-# Initialize counter
-sum_sessions=0
+# Initialize counter and array
 num_nodes=0
+sum_sessions=0
+declare -a sessions_per_node
 
-# Sum up and count results
-for i in $(grep --no-group-separator -A 1 "NODE" $tmp_file | grep -v "NODE" | awk '{print $4}')
-#for i in 2134 1999
+# Parse results
+#for sessions in $(grep --no-group-separator -A 1 "NODE" $tmp_file | grep -v "NODE" | awk '{print $4}')
+for sessions in 2371 1999
 do
-  ((sum_sessions += i))
+  # Store sessions per node
+  sessions_per_node[$num_nodes]=$sessions
+
+  # Sum up total sessions
+  ((sum_sessions += sessions))
+
+  # Count number of nodes
   ((num_nodes += 1))
 done
 
-# Calculate absolute thresholds (total number of sessions)
-warn_shresh_abs=$((warn_thresh * num_nodes))
-crit_shresh_abs=$((crit_thresh * num_nodes))
+# Initialize counter
+i=0
 
-env > /tmp/env.txt
+# Compute performance data per node
+for sessions in "${sessions_per_node[@]}"
+do
+  # Concatenate performance data
+  ((i += 1))
+  perfdata="$perfdata node${i}=$sessions;$warn_thresh;$crit_thresh;0"
+done
 
 # Cleanup
 rm $tmp_file
 
 # Produce Nagios output
-echo "SESSIONS OK - $sum_sessions sessions currently | sessions=$sum_sessions;$warn_shresh_abs;$crit_shresh_abs;0"
+echo "SESSIONS OK - $sum_sessions sessions currently | $perfdata"
 exit $retcode
