@@ -154,8 +154,8 @@ sum_sessions=0
 num_nodes=0
 
 # Sum up and count results
-#for i in $(grep --no-group-separator -A 1 "NODE" $tmp_file | grep -v "NODE" | awk '{print $4}')
-for i in 2134 1999
+for i in $(grep --no-group-separator -A 1 "NODE" $tmp_file | grep -v "NODE" | awk '{print $4}')
+#for i in 2134 1999
 do
   ((sum_sessions += i))
   ((num_nodes += 1))
