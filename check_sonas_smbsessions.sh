@@ -62,8 +62,6 @@
 ### Configuration ###
 #####################
 
-env > /tmp/env.txt
-
 # Warning threshold (number of sessions per node)
 warn_thresh=2000
 # Critical threshold (number of sessions per node)
