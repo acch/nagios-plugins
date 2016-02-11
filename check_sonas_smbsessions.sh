@@ -31,7 +31,7 @@
 #                     expect - programmed dialogue with interactive programs
 # Website:            https://github.com/acch/nagios-plugins
 
-# This bash script reports on the number of SMB sessions in an IBM Storwize V7000 Unified / SONAS system, using syslog entries in /var/log/messages.
+# This bash script reports on the number of SMB sessions in an IBM Storwize V7000 Unified / SONAS system, by evaluating syslog entries in /var/log/messages.
 # Storwize V7000 Unified / SONAS systems report the current number of sessions to each interface node's syslog. This script collects the current value and adds it up for all nodes.
 
 # The actual code is managed in the following GitHub rebository - please use the Issue Tracker to ask questions, report problems or request enhancements.
@@ -39,9 +39,9 @@
 
 # Disclaimer: This sample is provided 'as is', without any warranty or support. It is provided solely for demonstrative purposes - the end user must test and modify this sample to suit his or her particular environment. This code is provided for your convenience, only - though being tested, there's no guarantee that it doesn't seriously break things in your environment! If you decide to run it, you do so on your own risk!
 
-# It is strongly recommended to create a dedicated privileged Storwize V7000 Unified / SONAS user to be used by this script. This eases problem determination, allows proper audit tracing and helps avoiding undesired side-effects.
+# It is strongly recommended to create a dedicated privileged Storwize V7000 Unified / SONAS user to be used by this script. This eases problem determination, allows for proper audit tracing and helps avoiding undesired side-effects.
 
-# To create a privileged user 'nagios' with password 'secret' on Storwize V7000 Unified / SONAS, run the following commands as the Nagios operating-system user (by default called 'nagios', too):
+# To create a privileged user 'nagios' with password 'secret' on Storwize V7000 Unified / SONAS, run the following command as the Nagios operating-system user (by default called 'nagios', too):
 #   ssh admin@<mgmt_ip_address> mkuser nagios -p secret -g Privileged
 
 # You may want to define the following Nagios constructs to use this script:
@@ -51,7 +51,7 @@
 #   }
 #   define service{
 #     host_name       <your_system>
-#     service_description	SMB Sessions
+#     service_description SMB Sessions
 #     check_command   check_sonas_health!nagios
 #   }
 
@@ -61,6 +61,11 @@
 #####################
 ### Configuration ###
 #####################
+
+# Warning threshold (number of sessions per node)
+warn_thresh=2000
+# Critical threshold (number of sessions per node)
+crit_thresh=4000
 
 # Due to the Storwize V7000 Unified / SONAS security mechanisms we need to provide the password in clear text
 # Ensure that the actual password is followed by "\n"
@@ -144,42 +149,24 @@ cmd="grep children /var/log/messages | tail -n 1"
 # Check remote command return code
 if [ $? -ne 0 ]; then error_login; fi
 
-# Sum up results
-grep -A 1 "NODE" $tmp_file | grep -v "\-\-" | grep -v "NODE" | awk '{print $4}'
+# Initialize counter
+sum_sessions=0
+num_nodes=0
+
+# Sum up and count results
+for i in $(grep --no-group-separator -A 1 "NODE" $tmp_file | grep -v "NODE" | awk '{print $4}')
+do
+  ((sum_sessions += i))
+  ((num_nodes += 1))
+done
+
+# Calculate absolute thresholds (total number of sessions)
+warn_shresh_abs=$((warn_thresh * num_nodes))
+crit_shresh_abs=$((crit_thresh * num_nodes))
 
 # Cleanup
 rm $tmp_file
 
-exit 0
-
-# Parse remote command output
-while read line
-do
-  if [ $(echo "$line" | cut -d : -f 7) != "V7000" ] # Ignore V7000 sensors
-  then
-    case $(echo "$line" | cut -d : -f 9) in
-      OK) # Sensor OK state -> do nothing
-      ;;
-      WARNING) # Sensor WARNING state
-        if [ "$return_code" -lt 1 ]; then return_code=1; fi
-        # Append sensor message to output
-        if [ -n "$return_message" ]; then return_message="$return_message +++ "; fi
-        return_message="${return_message}FILE WARNING - [`echo $line | cut -d : -f 7`:`echo $line | cut -d : -f 8`] `echo $line | cut -d : -f 10`"
-      ;;
-      ERROR) # Sensor ERROR state
-        if [ "$return_code" -lt 2 ]; then return_code=2; fi
-        # Append sensor message to output
-        if [ -n "$return_message" ]; then return_message="$return_message +++ "; fi
-        return_message="${return_message}FILE CRITICAL - [`echo $line | cut -d : -f 7`:`echo $line | cut -d : -f 8`] `echo $line | cut -d : -f 10`"
-      ;;
-      *) error_response $line ;;
-    esac
-  fi
-done < $tmp_file
-
-# No warnings/errors detected
-if [ "$return_code" -eq 0 ]; then return_message="FILE OK - All sensors OK"; fi
-
 # Produce Nagios output
-echo $return_message
-exit $return_code
+echo "SESSIONS OK - ${sum_sessions} sessions currently | sessions=${sum_sessions};${warn_shresh_abs};${crit_shresh_abs};0;${crit_shresh_abs}"
+exit $retcode
