@@ -168,10 +168,10 @@ sum_sessions=0
 for sessions in $(grep --no-group-separator -A 1 "NODE" $tmp_file | grep -v "NODE" | awk '{print $4}')
 do
   # Count number of nodes
-  ((num_nodes += 1))
+  (( num_nodes += 1 ))
 
   # Sum up total sessions
-  ((sum_sessions += sessions))
+  (( sum_sessions += sessions ))
 
   # Concatenate performance data per node
   perfdata="$perfdata node${num_nodes}=$sessions;$warn_thresh;$crit_thresh;0;"
@@ -181,5 +181,5 @@ done
 rm $tmp_file
 
 # Produce Nagios output
-echo "SESSIONS OK - $sum_sessions sessions currently |$perfdata"
+echo "SMB OK - $sum_sessions sessions currently |$perfdata"
 exit $retcode
