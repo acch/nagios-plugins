@@ -31,8 +31,13 @@
 #                     expect - programmed dialogue with interactive programs
 # Website:            https://github.com/acch/nagios-plugins
 
-# //This bash script reports on the number of SMB sessions in an IBM Storwize V7000 Unified / SONAS system, by evaluating syslog entries in /var/log/messages.
-# //Storwize V7000 Unified / SONAS systems report the current number of sessions to each interface node's syslog. This script collects the current value and adds it up for all nodes.
+# This bash script reports on the number of VFS warnings logged by Samba in an IBM Storwize V7000 Unified / SONAS system, by evaluating syslog entries in /var/log/messages.
+# Samba logs slow VFS (filesystem) operations into each interface node's syslog. This script detects such messages and adds them up for all nodes.
+
+# Note that this script only evaluates the new syslog entries logged after the last check was run, and requires information on when that was (-l parameter). Such information is available in Nagios via the $LASTSERVICECHECK$ macro.
+
+# Refer to the Samba documentation for details on the VFS module:
+#  https://www.samba.org/samba/docs/man/manpages-3/vfs_time_audit.8.html
 
 # The actual code is managed in the following GitHub rebository - please use the Issue Tracker to ask questions, report problems or request enhancements.
 #   https://github.com/acch/nagios-plugins
