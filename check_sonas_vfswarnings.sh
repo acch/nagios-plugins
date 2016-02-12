@@ -79,7 +79,7 @@ password="secret\n"
 # Modify the following filenames to match your environment
 
 # Path to a temporary file holding the remote command output while it is being parsed by the script:
-tmp_file="/tmp/check_sonas_vfswarnings_$RANDOM.tmp" # Be sure this is writable by Nagios user!
+tmp_file="/tmp/check_sonas_vfswarnings_$RANDOM.tmp" # Be sure that this is writable by Nagios user!
 
 ####################################
 ### Do not edit below this line! ###
