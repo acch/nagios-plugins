@@ -62,10 +62,10 @@
 ### Configuration ###
 #####################
 
-# Warning threshold (number of warnings per interval)
-warn_thresh=2000
-# Critical threshold (number of warnings per interval)
-crit_thresh=4000
+# Warning threshold (number of warnings per minute)
+warn_thresh=10
+# Critical threshold (number of warnings per minute)
+crit_thresh=100
 
 # Due to the Storwize V7000 Unified / SONAS security mechanisms we need to provide the password in clear text
 # Ensure that the actual password is followed by "\n"
@@ -184,5 +184,6 @@ done
 rm $tmp_file
 
 # Produce Nagios output
+(( interval_m += 1 ))
 echo "VFS OK - ${num_warnings} warnings during last ${interval_m}m | warnings=${num_warnings}"
 exit $retcode
