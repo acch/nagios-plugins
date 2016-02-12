@@ -1,5 +1,5 @@
 # Nagios-Plugins
-Collection of Nagios / Icinga plugins. All checks submitted and listed on https://exchange.nagios.org.
+Collection of Nagios plugins. All checks submitted and listed on https://exchange.nagios.org.
 
 All code follows the [Nagios Plugin Development Guidelines](https://nagios-plugins.org/doc/guidelines.html).
 
