@@ -151,7 +151,8 @@ return_code=0
 ################################
 
 # Execute remote command
-cmd="grep ctdb /var/log/messages"
+#cmd="grep ctdb /var/log/messages"
+cmd="grep -e 'WARNING: VFS call.*took unexpectedly long' /var/log/messages"
 /usr/bin/expect -c "
   spawn ${rsh} sc onnode all \'${cmd}\'
   expect {
