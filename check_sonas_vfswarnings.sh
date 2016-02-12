@@ -47,7 +47,7 @@
 # You may want to define the following Nagios constructs to use this script:
 #   define command{
 #     command_name    check_sonas_vfswarnings
-#     command_line    /path/to/check_sonas_vfswarnings.sh -H $HOSTADDRESS$ -u $ARG1$
+#     command_line    /path/to/check_sonas_vfswarnings.sh -H $HOSTADDRESS$ -u $ARG1$ -l $LASTSERVICECHECK$
 #   }
 #   define service{
 #     host_name       <your_system>
@@ -56,15 +56,15 @@
 #   }
 
 # Version History:
-# 1.0    11.2.2016    Initial Release
+# 1.0    12.2.2016    Initial Release
 
 #####################
 ### Configuration ###
 #####################
 
-# Warning threshold (number of sessions per node)
+# Warning threshold (number of warnings per interval)
 warn_thresh=2000
-# Critical threshold (number of sessions per node)
+# Critical threshold (number of warnings per interval)
 crit_thresh=4000
 
 # Due to the Storwize V7000 Unified / SONAS security mechanisms we need to provide the password in clear text
@@ -81,7 +81,7 @@ tmp_file="/tmp/check_sonas_vfswarnings_$RANDOM.tmp" # Be sure this is writable b
 ####################################
 
 error_usage () {
-  echo "Usage: $0 -H <host_address> -u <username>"
+  echo "Usage: $0 -H <host_address> -u <username> -l \$LASTSERVICECHECK\$"
   exit 3
 }
 
@@ -98,13 +98,14 @@ error_response () {
 }
 
 # Check number of commandline options
-if [ $# -ne 4 ]; then error_usage; fi
+if [ $# -ne 6 ]; then error_usage; fi
 
 # Check commandline options
-while getopts 'H:u:' OPT; do
+while getopts 'H:u:l:' OPT; do
   case $OPT in
     H) hostaddress=$OPTARG ;;
     u) username=$OPTARG ;;
+    l) time_lastcheck=$OPTARG ;;
     *) error_usage ;;
   esac
 done
@@ -130,12 +131,6 @@ fi
 if ! touch $tmp_file 2> /dev/null
 then
   echo "${tmp_file} is not writable - please adjust its path!"
-  exit 3
-fi
-
-if [ ! $ICINGA_LASTSERVICECHECK ] || [ ! $ICINGA_TIMET ]
-then
-  echo "Environment not initialized - ensure that you have set enable_environment_macros=1"
   exit 3
 fi
 
@@ -167,7 +162,8 @@ cmd="grep ctdb /var/log/messages"
 if [ $? -ne 0 ]; then error_login; fi
 
 # Compute service check interval
-interval_s=$(( ICINGA_TIMET - ICINGA_LASTSERVICECHECK ))
+time_current=$(date +'%s')
+interval_s=$(( time_current - time_lastcheck ))
 interval_m=$(( interval_s / 60 ))
 (( interval_m -= 1 )) # skip first minute - it would otherwise be counted twice
 
@@ -188,5 +184,5 @@ done
 rm $tmp_file
 
 # Produce Nagios output
-echo "VFS OK - $num_warnings warnings currently | warnings=$num_warnings"
+echo "VFS OK - ${num_warnings} warnings during last ${interval_m}m | warnings=${num_warnings}"
 exit $retcode
