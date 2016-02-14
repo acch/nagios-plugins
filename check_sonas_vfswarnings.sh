@@ -37,7 +37,7 @@
 # Note that this script only evaluates the new syslog entries logged after the last check was run, and requires information on when that was (-l parameter). Such information is available in Nagios via the $LASTSERVICECHECK$ macro.
 
 # Refer to the Samba documentation for details on the VFS module:
-#  https://www.samba.org/samba/docs/man/manpages-3/vfs_time_audit.8.html
+#   https://www.samba.org/samba/docs/man/manpages-3/vfs_time_audit.8.html
 
 # The actual code is managed in the following GitHub rebository - please use the Issue Tracker to ask questions, report problems or request enhancements.
 #   https://github.com/acch/nagios-plugins
