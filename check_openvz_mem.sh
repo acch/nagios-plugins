@@ -26,7 +26,7 @@
 
 # Name:               Check OpenVZ Memory
 # Author:             Achim Christ - achim(dot)christ(at)gmail(dot)com
-# Version:            1.1
+# Version:            1.2
 # Dependencies:       bc - An arbitrary precision calculator language
 # Website:            https://github.com/acch/nagios-plugins
 
@@ -45,11 +45,24 @@
 # Version History:
 # 1.0    4.2.2016     Initial Release
 # 1.1    10.2.2016    Added check for dependencies
+# 1.2    14.2.2016    Added check for user_beancounters
 
 # Check for dependencies
 if [ ! -x /usr/bin/bc ]
 then
   echo "'bc' not found - please install it!"
+  exit 3
+fi
+
+# Check for user_beancounters
+if [ ! -e /proc/user_beancounters ]
+then
+  echo "'/proc/user_beancounters' not found - is this a OpenVZ container?"
+  exit 3
+fi
+if [ ! -r /proc/user_beancounters ]
+then
+  echo "'/proc/user_beancounters' not readable - root privileges required!"
   exit 3
 fi
 
