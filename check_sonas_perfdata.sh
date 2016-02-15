@@ -31,8 +31,9 @@
 #                     bc - An arbitrary precision calculator language
 # Website:            https://github.com/acch/nagios-plugins
 
-# //This bash script checks health of an IBM Storwize V7000 Unified / SONAS system, using the 'lshealth' CLI command.
-# //It allows for checking health of the system's front-end "FILE" component (both, Storwize V7000 Unified and SONAS), as well as health of the back-end "BLOCK" component (Storwize V7000 Unified, only - does not work with SONAS). The component to check is determined by the '-m' parameter: '-m f' checks health of the FILE component, '-m b' checks health of the BLOCK component.
+# This bash script reports on various performance metrics of an IBM Storwize V7000 Unified / SONAS system, using the 'lsperfdata' CLI command.
+# For a list of supported metrics run the script without any commandline arguments.
+# The script uses the performance center service which needs to be running on all nodes of Storwize V7000 Unified / SONAS.
 
 # The following CLI command is used to retrieve performance data:
 # lsperfdata
