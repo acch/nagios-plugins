@@ -76,6 +76,11 @@
 #     service_description  NETWORK Utilization
 #     check_command        check_sonas_perfdata!nagios!public_network!10000!20000
 #   }
+#   define service{
+#     host_name            <your_system>
+#     service_description  GPFS Throughput
+#     check_command        check_sonas_perfdata!nagios!gpfs_throughput!10000!20000
+#   }
 
 # Version History:
 # 1.0    15.02.2016    Initial Release
@@ -102,6 +107,7 @@ error_usage () {
   echo "  cpu_utilization [%]"
   echo "  cpu_iowait      [%]"
   echo "  public_network  [Bps]"
+  echo "  gpfs_throughput [Bps]"
   exit 3
 }
 
@@ -181,19 +187,33 @@ return_code=0
 query=""
 case "$metric" in
   "cpu_utilization")
-    query="lsperfdata -g cpu_idle_usage -t minute -n all | grep -v 'EFSSG1000I' | tail -n 1"
+    query="lsperfdata -g cpu_idle_usage -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
     # Retrieves the statistics for the % of CPU spent idle on each of the nodes
   ;;
   "cpu_iowait")
-    query="lsperfdata -g cpu_iowait_usage -t minute -n all | grep -v 'EFSSG1000I' | tail -n 1"
+    query="lsperfdata -g cpu_iowait_usage -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
     # Retrieves the statistics for the % CPU spent for waiting for IO to complete on each of the nodes
   ;;
   "public_network")
-    query="lsperfdata -g public_network_bytes_received -t minute -n all | grep -v 'EFSSG1000I' | tail -n 1"
+    query="lsperfdata -g public_network_bytes_received -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
     # Retrieves the total number of bytes received on all the client network interface of the nodes
     #lsperfdata -g public_network_bytes_sent -t minute -n all
     # Retrieves the total number of bytes sent on all the client network interface of the nodes
   ;;
+  "gpfs_throughput")
+    query="lsperfdata -g cluster_throughput -t hour | grep -v 'EFSSG1000I' | tail -n 1"
+    # Retrieves the number of bytes read and written across all the filesystems on all the nodes of the GPFS cluster
+  ;;
+
+  # Also available:
+  # client_throughput                Retrieves the total bytes received and total bytes sent across all the client network interface on all the interface nodes. Timeperiod is the only parameter for this graph.
+  # cluster_create_delete_latency    Retrieves the latency of the file create and delete operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
+  # cluster_create_delete_operations Retrieves the number of file create and delete operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
+  # cluster_open_close_latency       Retrieves the latency of file open and close operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
+  # cluster_open_close_operations    Retrieves the number of file open and close operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
+  # cluster_read_write_latency       Retrieves the latency of file read and write operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
+  # cluster_read_write_operations    Retrieves the number of file read and write operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
+
   # Check not implemented
   *) error_usage ;;
 esac
@@ -245,6 +265,15 @@ do
     "public_network")
       # Concatenate performance data per node
       perfdata="$perfdata node${num_nodes}=${i}B;${warn_thresh};${crit_thresh};0;"
+    ;;
+    "gpfs_throughput")
+      # Report on read and write performance
+      if [ "$perfdata" == "" ]
+      then
+        perfdata=" read=${i}B;${warn_thresh};${crit_thresh};0;"
+      else
+        perfdata="$perfdata write=${i}B;${warn_thresh};${crit_thresh};0;"
+      fi
     ;;
   esac
 done
