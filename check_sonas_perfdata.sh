@@ -58,18 +58,23 @@
 
 # You may want to define the following Nagios constructs to use this script:
 #   define command{
-#     command_name    check_sonas_perfdata
-#     command_line    /path/to/check_sonas_perfdata.sh -H $HOSTADDRESS$ -u $ARG1$ -m $ARG2$
+#     command_name         check_sonas_perfdata
+#     command_line         /path/to/check_sonas_perfdata.sh -H $HOSTADDRESS$ -u $ARG1$ -m $ARG2$
 #   }
 #   define service{
-#     host_name       <your_system>
-#     service_description CPU Utilization
-#     check_command   check_sonas_perfdata!nagios!c
+#     host_name            <your_system>
+#     service_description  CPU Utilization
+#     check_command        check_sonas_perfdata!nagios!cpu_utilization!80!90
 #   }
 #   define service{
-#     host_name       <your_system>
-#     service_description NETWORK Utilization
-#     check_command   check_sonas_perfdata!nagios!n
+#     host_name            <your_system>
+#     service_description  CPU IO Wait
+#     check_command        check_sonas_perfdata!nagios!cpu_iowait!3!5
+#   }
+#   define service{
+#     host_name            <your_system>
+#     service_description  NETWORK Utilization
+#     check_command        check_sonas_perfdata!nagios!public_network!10000!20000
 #   }
 
 # Version History:
@@ -78,11 +83,6 @@
 #####################
 ### Configuration ###
 #####################
-
-# Warning threshold (utilization percentage)
-warn_thresh=80
-# Critical threshold (utilization percentage)
-crit_thresh=90
 
 # Modify the following filenames to match your environment
 
@@ -97,7 +97,7 @@ tmp_file="/tmp/check_sonas_perfdata_$RANDOM.tmp" # Be sure that this is writable
 ####################################
 
 error_usage () {
-  echo "Usage: $0 -H <host_address> -u <username> -m <metric>"
+  echo "Usage: $0 -H <host_address> -u <username> -m <metric> -w <warning_threshold> -c <critical_threshold>"
   echo "Supported metrics:"
   echo "  cpu_utilization [%]"
   echo "  cpu_iowait      [%]"
@@ -118,14 +118,16 @@ error_response () {
 }
 
 # Check number of commandline options
-if [ $# -ne 6 ]; then error_usage; fi
+if [ $# -ne 10 ]; then error_usage; fi
 
 # Check commandline options
-while getopts 'H:u:m:' OPT; do
+while getopts 'H:u:m:w:c:' OPT; do
   case $OPT in
     H) hostaddress=$OPTARG ;;
     u) username=$OPTARG ;;
     m) metric=$OPTARG ;;
+    w) warn_thresh=$OPTARG ;;
+    c) crit_thresh=$OPTARG ;;
     *) error_usage ;;
   esac
 done
@@ -238,7 +240,7 @@ do
     ;;
     "cpu_iowait")
       # Concatenate performance data per node
-      perfdata="$perfdata node${num_nodes}=${i}%;${warn_thresh};${crit_thresh};0;100"
+      perfdata="$perfdata node${num_nodes}=${i}%;${warn_thresh};${crit_thresh};0;"
     ;;
     "public_network")
       # Concatenate performance data per node
