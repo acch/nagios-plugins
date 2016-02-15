@@ -34,6 +34,14 @@
 # //This bash script checks health of an IBM Storwize V7000 Unified / SONAS system, using the 'lshealth' CLI command.
 # //It allows for checking health of the system's front-end "FILE" component (both, Storwize V7000 Unified and SONAS), as well as health of the back-end "BLOCK" component (Storwize V7000 Unified, only - does not work with SONAS). The component to check is determined by the '-m' parameter: '-m f' checks health of the FILE component, '-m b' checks health of the BLOCK component.
 
+# The following CLI command is used to retrieve performance data:
+# lsperfdata
+#   http://www-01.ibm.com/support/knowledgecenter/STAV45/com.ibm.sonas.doc/manpages/lsperfdata.html
+
+# If the above command is unable to retrieve performance data, then one reason might be that performance data collection is not running, which can be verified and fixed with this CLI command:
+# cfgperfcenter
+#   http://www-01.ibm.com/support/knowledgecenter/STAV45/com.ibm.sonas.doc/manpages/cfgperfcenter.html
+
 # The actual code is managed in the following GitHub rebository - please use the Issue Tracker to ask questions, report problems or request enhancements.
 #   https://github.com/acch/nagios-plugins
 
