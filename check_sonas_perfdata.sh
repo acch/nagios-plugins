@@ -97,7 +97,11 @@ tmp_file="/tmp/check_sonas_perfdata_$RANDOM.tmp" # Be sure that this is writable
 ####################################
 
 error_usage () {
-  echo "Usage: $0 -H <host_address> -u <username> -m [c|n]"
+  echo "Usage: $0 -H <host_address> -u <username> -m <metric>"
+  echo "Supported metrics:"
+  echo "  cpu_utilization [%]"
+  echo "  cpu_iowait      [%]"
+  echo "  public_network  [Bps]"
   exit 3
 }
 
@@ -121,7 +125,7 @@ while getopts 'H:u:m:' OPT; do
   case $OPT in
     H) hostaddress=$OPTARG ;;
     u) username=$OPTARG ;;
-    m) mode=$OPTARG ;;
+    m) metric=$OPTARG ;;
     *) error_usage ;;
   esac
 done
@@ -169,106 +173,84 @@ rsh="/usr/bin/ssh \
 # Initialize return code
 return_code=0
 
-case "$mode" in
-  #########################
-  # Check CPU utilization #
-  #########################
-  c)
-    # Execute remote command
-    $rsh "lsperfdata -g cpu_idle_usage -t minute -n all | grep -v 'EFSSG1000I' | tail -n 1" &> $tmp_file
+#############################
+# Retrieve performance data #
+#############################
+query=""
+case "$metric" in
+  "cpu_utilization")
+    query="lsperfdata -g cpu_idle_usage -t minute -n all | grep -v 'EFSSG1000I' | tail -n 1"
     # Retrieves the statistics for the % of CPU spent idle on each of the nodes
-    #cpu_iowait_usage
-    # Retrieves the statistics for the % CPU spent for waiting for IO to complete on each of the nodes
-
-    # Check remote command return code
-    if [ $? -ne 0 ]; then error_login; fi
-
-    # Check for performance center errors
-    if grep 'EFSSG0002I' $tmp_file &> /dev/null
-    then
-      echo "Error collecting performance data - check if performance center service is running using 'cfgperfcenter'"
-      rm $tmp_file
-      exit 3
-    fi
-
-    # Extract performance data from output
-    perfdata_raw=$(cat "$tmp_file" | cut -d ',' -f 3- | sed 's/,/ /g')
-
-    # Check extracted performance data
-    if [ "$perfdata_raw" == "" ]
-    then
-      error_response $(cat "$tmp_file")
-    fi
-
-    # Initialize counter
-    num_nodes=0
-
-    # Compute performance data output
-    for i in $perfdata_raw
-    do
-      # Count number of nodes
-      (( num_nodes += 1 ))
-
-      # Calculate utilization
-      utilization=$(echo "100-$i" | bc)
-
-      # Concatenate performance data per node
-      perfdata="$perfdata node${num_nodes}=${utilization};${warn_thresh};${crit_thresh};0;100"
-    done
-
-    # Nagios output
-    return_message="CPU OK |$perfdata"
-    return_code=0
-
-    # Cleanup
-    rm $tmp_file
   ;;
-  #############################
-  # Check NETWORK utilization #
-  #############################
-  n)
-    # Execute remote command
-    #lsperfdata -g public_network_bytes_received -t minute -n all
+  "cpu_iowait")
+    query="lsperfdata -g cpu_iowait_usage -t minute -n all | grep -v 'EFSSG1000I' | tail -n 1"
+    # Retrieves the statistics for the % CPU spent for waiting for IO to complete on each of the nodes
+  ;;
+  "public_network")
+    query="lsperfdata -g public_network_bytes_received -t minute -n all | grep -v 'EFSSG1000I' | tail -n 1"
     # Retrieves the total number of bytes received on all the client network interface of the nodes
     #lsperfdata -g public_network_bytes_sent -t minute -n all
     # Retrieves the total number of bytes sent on all the client network interface of the nodes
-#    $rsh "lshealth -i STRG -Y | grep -v HEADER" &> $tmp_file
-
-    # Check remote command return code
-#    if [ $? -ne 0 ]; then error_login; fi
-
-    # Parse remote command output
-#    while read line
-#    do
-#      case $(echo "$line" | cut -d : -f 10) in
-#        message) # Sensor OK state -> do nothing
-#        ;;
-#        warning) # Sensor WARNING state
-#          if [ "$return_code" -lt 1 ]; then return_code=1; fi
-#          # Append sensor message to output
-#          if [ -n "$return_message" ]; then return_message="$return_message +++ "; fi
-#          return_message="${return_message}BLOCK WARNING - [`echo $line | cut -d : -f 8`:`echo $line | cut -d : -f 9`] `echo $line | cut -d : -f 11`"
-#        ;;
-#        alert) # Sensor ERROR state
-#          if [ "$return_code" -lt 2 ]; then return_code=2; fi
-#          # Append sensor message to output
-#          if [ -n "$return_message" ]; then return_message="$return_message +++ "; fi
-#          return_message="${return_message}BLOCK CRITICAL - [`echo $line | cut -d : -f 8`:`echo $line | cut -d : -f 9`] `echo $line | cut -d : -f 11`"
-#        ;;
-#        *) error_response $line ;;
-#      esac
-#    done < $tmp_file
-
-    # No warnings/errors detected
-#    if [ "$return_code" -eq 0 ]; then return_message="BLOCK OK - All sensors OK"; fi
-
-    # Cleanup
-#    rm $tmp_file
   ;;
   # Check not implemented
   *) error_usage ;;
 esac
 
+# Execute remote command
+$rsh $query &> $tmp_file
+
+# Check remote command return code
+if [ $? -ne 0 ]; then error_login; fi
+
+# Check for performance center errors
+if grep 'EFSSG0002I' $tmp_file &> /dev/null
+then
+  echo "Error collecting performance data - check if performance center service is running using 'cfgperfcenter'"
+  rm $tmp_file
+  exit 3
+fi
+
+# Extract performance data from output
+perfdata_raw=$(cat "$tmp_file" | cut -d ',' -f 3- | sed 's/,/ /g')
+echo ">>>" $perfdata_raw
+
+# Check extracted performance data
+if [ "$perfdata_raw" == "" ]
+then
+  error_response $(cat "$tmp_file")
+fi
+
+# Initialize counter
+num_nodes=0
+perfdata=""
+
+# Compute performance data output
+for i in $perfdata_raw
+do
+  # Count number of nodes
+  (( num_nodes += 1 ))
+
+  case "$metric" in
+    "cpu_utilization")
+      # Calculate utilization from %idle
+      utilization=$(echo "100-$i" | bc)
+      # Concatenate performance data per node
+      perfdata="$perfdata node${num_nodes}=${utilization}%;${warn_thresh};${crit_thresh};0;100"
+    ;;
+    "cpu_iowait")
+      # Concatenate performance data per node
+      perfdata="$perfdata node${num_nodes}=${i}%;${warn_thresh};${crit_thresh};0;100"
+    ;;
+    "public_network")
+      # Concatenate performance data per node
+      perfdata="$perfdata node${num_nodes}=${i}B;${warn_thresh};${crit_thresh};0;"
+    ;;
+  esac
+done
+
+# Cleanup
+rm $tmp_file
+
 # Produce Nagios output
-echo $return_message
+echo "CPU OK |$perfdata"
 exit $return_code
