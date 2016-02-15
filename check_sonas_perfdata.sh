@@ -212,7 +212,6 @@ fi
 
 # Extract performance data from output
 perfdata_raw=$(cat "$tmp_file" | cut -d ',' -f 3- | sed 's/,/ /g')
-echo ">>>" $perfdata_raw
 
 # Check extracted performance data
 if [ "$perfdata_raw" == "" ]
