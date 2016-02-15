@@ -191,5 +191,5 @@ rm $tmp_file
 
 # Produce Nagios output
 (( interval_m += 1 ))
-echo "VFS OK - ${num_warnings} warnings during last ${interval_m}m | warnings=${num_warnings}"
+echo "VFS OK - ${num_warnings} warnings during last ${interval_m}m | warnings=${num_warnings}Warnings"
 exit $retcode

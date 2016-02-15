@@ -174,7 +174,7 @@ do
   (( sum_sessions += sessions ))
 
   # Concatenate performance data per node
-  perfdata="$perfdata node${num_nodes}=${sessions};${warn_thresh};${crit_thresh};0;"
+  perfdata="$perfdata node${num_nodes}=${sessions}Sessions;${warn_thresh};${crit_thresh};0;"
 done
 
 # Cleanup
