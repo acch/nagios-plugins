@@ -46,13 +46,13 @@
 
 # You may want to define the following Nagios constructs to use this script:
 #   define command{
-#     command_name    check_sonas_smbsessions
-#     command_line    /path/to/check_sonas_smbsessions.sh -H $HOSTADDRESS$ -u $ARG1$
+#     command_name         check_sonas_smbsessions
+#     command_line         /path/to/check_sonas_smbsessions.sh -H $HOSTADDRESS$ -u $ARG1$
 #   }
 #   define service{
-#     host_name       <your_system>
-#     service_description SMB Sessions
-#     check_command   check_sonas_health!nagios
+#     host_name            <your_system>
+#     service_description  SMB Sessions
+#     check_command        check_sonas_health!nagios
 #   }
 
 # Version History:

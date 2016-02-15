@@ -49,18 +49,18 @@
 
 # You may want to define the following Nagios constructs to use this script:
 #   define command{
-#     command_name    check_sonas_health
-#     command_line    /path/to/check_sonas_health.sh -H $HOSTADDRESS$ -u $ARG1$ -m $ARG2$
+#     command_name         check_sonas_health
+#     command_line         /path/to/check_sonas_health.sh -H $HOSTADDRESS$ -u $ARG1$ -m $ARG2$
 #   }
 #   define service{
-#     host_name       <your_system>
-#     service_description BLOCK Health
-#     check_command   check_sonas_health!nagios!b
+#     host_name            <your_system>
+#     service_description  BLOCK Health
+#     check_command        check_sonas_health!nagios!b
 #   }
 #   define service{
-#     host_name       <your_system>
-#     service_description FILE Health
-#     check_command   check_sonas_health!nagios!f
+#     host_name            <your_system>
+#     service_description  FILE Health
+#     check_command        check_sonas_health!nagios!f
 #   }
 
 # Version History:

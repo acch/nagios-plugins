@@ -51,13 +51,13 @@
 
 # You may want to define the following Nagios constructs to use this script:
 #   define command{
-#     command_name    check_sonas_vfswarnings
-#     command_line    /path/to/check_sonas_vfswarnings.sh -H $HOSTADDRESS$ -u $ARG1$ -l $LASTSERVICECHECK$
+#     command_name         check_sonas_vfswarnings
+#     command_line         /path/to/check_sonas_vfswarnings.sh -H $HOSTADDRESS$ -u $ARG1$ -l $LASTSERVICECHECK$
 #   }
 #   define service{
-#     host_name       <your_system>
-#     service_description VFS Warnings
-#     check_command   check_sonas_vfswarnings!nagios
+#     host_name            <your_system>
+#     service_description  VFS Warnings
+#     check_command        check_sonas_vfswarnings!nagios
 #   }
 
 # Version History:
