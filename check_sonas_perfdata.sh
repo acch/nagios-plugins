@@ -283,5 +283,5 @@ done
 rm $tmp_file
 
 # Produce Nagios output
-echo "CPU OK |$perfdata"
+echo "PERFDATA OK |$perfdata"
 exit $return_code
