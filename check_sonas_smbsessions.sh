@@ -150,7 +150,7 @@ return_code=0
 ################################
 
 # Execute remote command
-cmd="grep children /var/log/messages | tail -n 1"
+cmd="grep 'children' /var/log/messages | tail -n 1"
 /usr/bin/expect -c "
   spawn ${rsh} sc onnode all \'${cmd}\'
   expect {
