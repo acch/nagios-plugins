@@ -125,17 +125,17 @@ then
   exit 3
 fi
 
-# Check if temporary file is writable
-if ! touch $tmp_file 2> /dev/null
-then
-  echo "${tmp_file} is not writable - please adjust its path!"
-  exit 3
-fi
-
 # Check if identity file is readable
 if [ ! -r $identity_file ]
 then
   echo "${identity_file} is not readable - please adjust its path!"
+  exit 3
+fi
+
+# Check if temporary file is writable
+if ! touch $tmp_file 2> /dev/null
+then
+  echo "${tmp_file} is not writable - please adjust its path!"
   exit 3
 fi
 
