@@ -160,7 +160,7 @@ cmd="grep 'children' /var/log/messages | tail -n 1"
 # Check remote command return code
 if [ $? -ne 0 ]; then error_login; fi
 
-# Initialize counter and array
+# Initialize counter
 num_nodes=0
 sum_sessions=0
 
