@@ -60,7 +60,7 @@
 # You may want to define the following Nagios constructs to use this script:
 #   define command{
 #     command_name         check_sonas_perfdata
-#     command_line         /path/to/check_sonas_perfdata.sh -H $HOSTADDRESS$ -u $ARG1$ -m $ARG2$
+#     command_line         /path/to/check_sonas_perfdata.sh -H $HOSTADDRESS$ -u $ARG1$ -m $ARG2$ -w $ARG3$ -c $ARG4$
 #   }
 #   define service{
 #     host_name            <your_system>
