@@ -74,7 +74,7 @@
 #   }
 #   define service{
 #     host_name            <your_system>
-#     service_description  NETWORK Utilization
+#     service_description  NETWORK Throughput
 #     check_command        check_sonas_perfdata!nagios!public_network!10000!20000
 #   }
 #   define service{
@@ -104,11 +104,11 @@ tmp_file="/tmp/check_sonas_perfdata_$RANDOM.tmp" # Be sure that this is writable
 
 error_usage () {
   echo "Usage: $0 -H <host_address> -u <username> -m <metric> -w <warning_threshold> -c <critical_threshold>"
-  echo "Supported metrics:"
-  echo "  cpu_utilization [%]"
-  echo "  cpu_iowait      [%]"
-  echo "  public_network  [Bps]"
-  echo "  gpfs_throughput [Bps]"
+  echo "Supported metrics:  [unit]"
+  echo "  cpu_utilization   [%]"
+  echo "  cpu_iowait        [%]"
+  echo "  public_network    [Bps]"
+  echo "  gpfs_throughput   [Bps]"
   exit 3
 }
 
@@ -182,102 +182,144 @@ rsh="/usr/bin/ssh \
 # Initialize return code
 return_code=0
 
-#############################
-# Retrieve performance data #
-#############################
-query=""
-case "$metric" in
-  "cpu_utilization")
-    query="lsperfdata -g cpu_idle_usage -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
-    # Retrieves the statistics for the % of CPU spent idle on each of the nodes
-  ;;
-  "cpu_iowait")
-    query="lsperfdata -g cpu_iowait_usage -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
-    # Retrieves the statistics for the % CPU spent for waiting for IO to complete on each of the nodes
-  ;;
-  "public_network")
-    query="lsperfdata -g public_network_bytes_received -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
-    # Retrieves the total number of bytes received on all the client network interface of the nodes
-    #lsperfdata -g public_network_bytes_sent -t minute -n all
-    # Retrieves the total number of bytes sent on all the client network interface of the nodes
-  ;;
-  "gpfs_throughput")
-    query="lsperfdata -g cluster_throughput -t hour | grep -v 'EFSSG1000I' | tail -n 1"
-    # Retrieves the number of bytes read and written across all the filesystems on all the nodes of the GPFS cluster
-  ;;
-
-  # Also available:
-  # client_throughput                Retrieves the total bytes received and total bytes sent across all the client network interface on all the interface nodes. Timeperiod is the only parameter for this graph.
-  # cluster_create_delete_latency    Retrieves the latency of the file create and delete operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
-  # cluster_create_delete_operations Retrieves the number of file create and delete operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
-  # cluster_open_close_latency       Retrieves the latency of file open and close operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
-  # cluster_open_close_operations    Retrieves the number of file open and close operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
-  # cluster_read_write_latency       Retrieves the latency of file read and write operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
-  # cluster_read_write_operations    Retrieves the number of file read and write operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
-
-  # Check not implemented
-  *) error_usage ;;
-esac
-
-# Execute remote command
-$rsh $query &> $tmp_file
-
-# Check remote command return code
-if [ $? -ne 0 ]; then error_login; fi
-
-# Check for performance center errors
-if grep 'EFSSG0002I' $tmp_file &> /dev/null
-then
-  echo "Error collecting performance data - check if performance center service is running using 'cfgperfcenter'"
-  rm $tmp_file
-  exit 3
-fi
-
-# Extract performance data from output
-perfdata_raw=$(cat "$tmp_file" | cut -d ',' -f 3- | sed 's/,/ /g')
-
-# Check extracted performance data
-if [ "$perfdata_raw" == "" ]
-then
-  error_response $(cat "$tmp_file")
-fi
-
-# Initialize counter
-num_nodes=0
+# Initialize performance data
 perfdata=""
 
-# Compute performance data output
-for i in $perfdata_raw
+# Query multiple metrics if required
+repeat=1
+while [ $repeat -gt 0 ]
 do
-  # Count number of nodes
-  (( num_nodes += 1 ))
-
+  #############################
+  # Retrieve performance data #
+  #############################
+  query=""
   case "$metric" in
     "cpu_utilization")
-      # Calculate utilization from %idle
-      utilization=$(echo "100-$i" | bc)
-      # Concatenate performance data per node
-      perfdata="$perfdata node${num_nodes}=${utilization}%;${warn_thresh};${crit_thresh};0;100"
+      query="lsperfdata -g cpu_idle_usage -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
+      # Retrieves the statistics for the % of CPU spent idle on each of the nodes
     ;;
     "cpu_iowait")
-      # Concatenate performance data per node
-      perfdata="$perfdata node${num_nodes}=${i}%;${warn_thresh};${crit_thresh};0;"
+      query="lsperfdata -g cpu_iowait_usage -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
+      # Retrieves the statistics for the % CPU spent for waiting for IO to complete on each of the nodes
     ;;
     "public_network")
-      # Concatenate performance data per node
-      perfdata="$perfdata node${num_nodes}=${i}B;${warn_thresh};${crit_thresh};0;"
-    ;;
-    "gpfs_throughput")
-      # Report on read and write performance
       if [ "$perfdata" == "" ]
       then
-        perfdata=" read=${i}B;${warn_thresh};${crit_thresh};0;"
+        # First repeat
+        query="lsperfdata -g public_network_bytes_received -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
+        # Retrieves the total number of bytes received on all the client network interface of the nodes
       else
-        perfdata="$perfdata write=${i}B;${warn_thresh};${crit_thresh};0;"
+        # Second repeat
+        query="lsperfdata -g public_network_bytes_sent -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
+        # Retrieves the total number of bytes sent on all the client network interface of the nodes
       fi
     ;;
+    "gpfs_throughput")
+      query="lsperfdata -g cluster_throughput -t hour | grep -v 'EFSSG1000I' | tail -n 1"
+      # Retrieves the number of bytes read and written across all the filesystems on all the nodes of the GPFS cluster
+    ;;
+
+    # Also available:
+    # client_throughput                Retrieves the total bytes received and total bytes sent across all the client network interface on all the interface nodes. Timeperiod is the only parameter for this graph.
+    # cluster_create_delete_latency    Retrieves the latency of the file create and delete operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
+    # cluster_create_delete_operations Retrieves the number of file create and delete operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
+    # cluster_open_close_latency       Retrieves the latency of file open and close operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
+    # cluster_open_close_operations    Retrieves the number of file open and close operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
+    # cluster_read_write_latency       Retrieves the latency of file read and write operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
+    # cluster_read_write_operations    Retrieves the number of file read and write operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
+
+    # Check not implemented
+    *) error_usage ;;
   esac
-done
+
+  # Execute remote command
+  $rsh $query &> $tmp_file
+
+  # Check remote command return code
+  if [ $? -ne 0 ]; then error_login; fi
+
+  # Check for performance center errors
+  if grep 'EFSSG0002I' $tmp_file &> /dev/null
+  then
+    echo "Error collecting performance data - check if performance center service is running using 'cfgperfcenter'"
+    rm $tmp_file
+    exit 3
+  fi
+
+  # Extract performance data from output
+  perfdata_raw=$(cat "$tmp_file" | cut -d ',' -f 3- | sed 's/,/ /g')
+
+  # Check extracted performance data
+  if [ "$perfdata_raw" == "" ]
+  then
+    error_response $(cat "$tmp_file")
+  fi
+
+  # Initialize counter
+  num_nodes=0
+
+  # Compute performance data output
+  for i in $perfdata_raw
+  do
+    # Count number of nodes
+    (( num_nodes += 1 ))
+
+    case "$metric" in
+      "cpu_utilization")
+        # Calculate utilization from %idle
+        utilization=$(echo "100-$i" | bc)
+
+        # Concatenate performance data per node
+        perfdata="$perfdata node${num_nodes}=${utilization}%;${warn_thresh};${crit_thresh};0;100"
+
+        # No need to repeat
+        repeat=0
+      ;;
+      "cpu_iowait")
+        # Concatenate performance data per node
+        perfdata="$perfdata node${num_nodes}=${i}%;${warn_thresh};${crit_thresh};0;"
+
+        # No need to repeat
+        repeat=0
+      ;;
+      "public_network")
+        # Report on send and receive performance
+        if [ $repeat -eq 1 ]
+        then
+          # First repeat - concatenate receive performance per node
+          perfdata="$perfdata node${num_nodes}_received=${i}B;${warn_thresh};${crit_thresh};0;"
+        else
+          # Second repeat - concatenate send performance per node
+          perfdata="$perfdata node${num_nodes}_sent=${i}B;${warn_thresh};${crit_thresh};0;"
+        fi
+
+        if [ $num_nodes -eq 2 ]; then
+          # Count repeats
+          (( repeat += 1 ))
+
+          # Repeat twice
+          if [ $repeat -gt 2 ]; then repeat=0; fi
+        fi
+      ;;
+      "gpfs_throughput")
+        # Report on read and write performance
+        if [ "$perfdata" == "" ]
+        then
+          # First metric
+          perfdata=" read=${i}B;${warn_thresh};${crit_thresh};0;"
+        else
+          # Second metric
+          perfdata="$perfdata write=${i}B;${warn_thresh};${crit_thresh};0;"
+        fi
+
+        # No need to repeat
+        repeat=0
+      ;;
+    esac
+
+  done # for i in $perfdata_raw
+
+done # while [ $repeat -gt 0 ]
 
 # Cleanup
 rm $tmp_file
