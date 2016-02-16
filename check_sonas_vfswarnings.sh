@@ -175,6 +175,8 @@ interval_m=$(( interval_s / 60 ))
 
 # Initialize counter
 num_warnings=0
+warn_thresh_abs=0
+crit_thresh_abs=0
 
 # Find VFS warnings during last service check interval
 for (( i = $interval_m;  i >= 0; --i ))
@@ -184,6 +186,10 @@ do
 
   # Sum up warnings in interval
   (( num_warnings += warnings ))
+
+  # Sum up thresholds
+  (( warn_thresh_abs += warn_thresh ))
+  (( crit_thresh_abs += crit_thresh ))
 done
 
 # Cleanup
@@ -191,5 +197,5 @@ rm $tmp_file
 
 # Produce Nagios output
 (( interval_m += 1 ))
-echo "VFS OK - ${num_warnings} warnings during last ${interval_m}m | warnings=${num_warnings}Warnings"
+echo "VFS OK - ${num_warnings} warnings during last ${interval_m}m | warnings=${num_warnings}Warnings;${warn_thresh_abs};${crit_thresh_abs};0;"
 exit $retcode
