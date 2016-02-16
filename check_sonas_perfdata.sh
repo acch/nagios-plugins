@@ -205,6 +205,9 @@ do
     "public_network")
       if [ "$perfdata" == "" ]
       then
+        # Repeat twice
+        repeat=2
+
         # First repeat
         query="lsperfdata -g public_network_bytes_received -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
         # Retrieves the total number of bytes received on all the client network interface of the nodes
@@ -271,34 +274,20 @@ do
 
         # Concatenate performance data per node
         perfdata="$perfdata node${num_nodes}=${utilization}%;${warn_thresh};${crit_thresh};0;100"
-
-        # No need to repeat
-        repeat=0
       ;;
       "cpu_iowait")
         # Concatenate performance data per node
         perfdata="$perfdata node${num_nodes}=${i}%;${warn_thresh};${crit_thresh};0;"
-
-        # No need to repeat
-        repeat=0
       ;;
       "public_network")
         # Report on send and receive performance
-        if [ $repeat -eq 1 ]
+        if [ $repeat -eq 2 ]
         then
           # First repeat - concatenate receive performance per node
           perfdata="$perfdata node${num_nodes}_received=${i}B;${warn_thresh};${crit_thresh};0;"
         else
           # Second repeat - concatenate send performance per node
           perfdata="$perfdata node${num_nodes}_sent=${i}B;${warn_thresh};${crit_thresh};0;"
-        fi
-
-        if [ $num_nodes -eq 2 ]; then
-          # Count repeats
-          (( repeat += 1 ))
-
-          # Repeat twice
-          if [ $repeat -gt 2 ]; then repeat=0; fi
         fi
       ;;
       "gpfs_throughput")
@@ -311,13 +300,13 @@ do
           # Second metric
           perfdata="$perfdata write=${i}B;${warn_thresh};${crit_thresh};0;"
         fi
-
-        # No need to repeat
-        repeat=0
       ;;
     esac
 
   done # for i in $perfdata_raw
+
+  # Count repeats
+  (( repeat -= 1 ))
 
 done # while [ $repeat -gt 0 ]
 
