@@ -330,7 +330,7 @@ do
         fi
 
         # Produce output
-        output="Total received $(echo "${count_metric_1}/1024" | bc)MB/s sent $(echo "${count_metric_2}/1024" | bc)MB/s"
+        output="Total received $(echo "${count_metric_1}/1024/1024" | bc)MB/s sent $(echo "${count_metric_2}/1024/1024" | bc)MB/s"
       ;;
       "gpfs_throughput")
         # Report on read and write throughput
@@ -340,13 +340,13 @@ do
           perfdata=" read=${i}B;${warn_thresh};${crit_thresh};0;"
 
           # Produce output
-          output="Total read $(echo "${i}/1024" | bc)MB/s"
+          output="Total read $(echo "${i}/1024/1024" | bc)MB/s"
         else
           # Second metric - concatenate write performance
           perfdata="$perfdata write=${i}B;${warn_thresh};${crit_thresh};0;"
 
           # Produce output
-          output="$output write $(echo "${i}/1024" | bc)MB/s"
+          output="$output write $(echo "${i}/1024/1024" | bc)MB/s"
         fi
       ;;
     esac
