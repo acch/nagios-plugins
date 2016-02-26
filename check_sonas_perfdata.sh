@@ -275,13 +275,13 @@ do
     case "$metric" in
       "cpu_utilization")
         # Calculate utilization from %idle
-        utilization=$(echo "100-$i" | bc)
+        utilization=$(echo "100-${i}" | bc)
 
         # Concatenate performance data per node
         perfdata="$perfdata node${num_nodes}=${utilization}%;${warn_thresh};${crit_thresh};0;100"
 
         # Calculate max utilization for output
-        if [[ "$utilization" > "$count_metric_1" ]] # TODO: float compare?!
+        if [ $(echo "${utilization}>${count_metric_1}" | bc) -eq 1 ]
         then
           count_metric_1=$utilization
         fi
@@ -299,7 +299,7 @@ do
         perfdata="$perfdata node${num_nodes}=${i}%;${warn_thresh};${crit_thresh};0;"
 
         # Calculate max utilization for output
-        if [[ "$i" > "$count_metric_1" ]] # TODO: float compare?!
+        if [ $(echo "${i}>${count_metric_1}" | bc) -eq 1 ]
         then
           count_metric_1=$i
         fi
@@ -330,7 +330,7 @@ do
         fi
 
         # Produce output
-        output="Total received ${count_metric_1}B/s sent ${count_metric_2}B/s"
+        output="Total received $(echo "${count_metric_1}/1024" | bc)MB/s sent $(echo "${count_metric_2}/1024" | bc)MB/s"
       ;;
       "gpfs_throughput")
         # Report on read and write throughput
@@ -340,13 +340,13 @@ do
           perfdata=" read=${i}B;${warn_thresh};${crit_thresh};0;"
 
           # Produce output
-          output="Total read ${i}B/s"
+          output="Total read $(echo "${i}/1024" | bc)MB/s"
         else
           # Second metric - concatenate write performance
           perfdata="$perfdata write=${i}B;${warn_thresh};${crit_thresh};0;"
 
           # Produce output
-          output="$output write ${i}B/s"
+          output="$output write $(echo "${i}/1024" | bc)MB/s"
         fi
       ;;
     esac
