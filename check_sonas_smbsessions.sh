@@ -52,11 +52,11 @@
 #   define service{
 #     host_name            <your_system>
 #     service_description  SMB Sessions
-#     check_command        check_sonas_health!nagios
+#     check_command        check_sonas_smbsessions!nagios
 #   }
 
 # Version History:
-# 1.0    11.2.2016    Initial Release
+# 1.0    26.2.2016    Initial Release
 
 #####################
 ### Configuration ###
