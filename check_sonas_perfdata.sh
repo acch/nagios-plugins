@@ -182,12 +182,17 @@ rsh="/usr/bin/ssh \
 # Initialize return code
 return_code=0
 
-# Initialize performance data
+# Initialize performance data and output
 perfdata=""
+output=""
+
+# Initialize counter
+count_metric_1=0
+count_metric_2=0
 
 # Query multiple metrics if required
 repeat=1
-while [ $repeat -gt 0 ]
+while [ "$repeat" -gt 0 ]
 do
   #############################
   # Retrieve performance data #
@@ -261,7 +266,7 @@ do
   # Initialize counter
   num_nodes=0
 
-  # Compute performance data output
+  # Compute performance data and output
   for i in $perfdata_raw
   do
     # Count number of nodes
@@ -274,31 +279,74 @@ do
 
         # Concatenate performance data per node
         perfdata="$perfdata node${num_nodes}=${utilization}%;${warn_thresh};${crit_thresh};0;100"
+
+        # Calculate max utilization for output
+        if [[ "$utilization" > "$count_metric_1" ]] # TODO: float compare?!
+        then
+          count_metric_1=$utilization
+        fi
+
+        # Produce output
+        output="Max. CPU utilization ${count_metric_1}%"
+
+        # Calculate average utilization for output
+        #sum_metric=$(echo "${sum_metric}+${utilization}" | bc)
+        #output=$(echo "${sum_metric}/${num_nodes}" | bc)
+        #output="Max. CPU utilization ${output}%"
       ;;
       "cpu_iowait")
         # Concatenate performance data per node
         perfdata="$perfdata node${num_nodes}=${i}%;${warn_thresh};${crit_thresh};0;"
+
+        # Calculate max utilization for output
+        if [[ "$i" > "$count_metric_1" ]] # TODO: float compare?!
+        then
+          count_metric_1=$i
+        fi
+
+        # Produce output
+        output="Max. IO Wait ${count_metric_1}%"
+
+        # Calculate average utilization for output
+        #sum_metric=$(echo "${sum_metric}+${i}" | bc)
+        #output=$(echo "${sum_metric}/${num_nodes}" | bc)
+        #output="Max. IO wait ${output}%"
       ;;
       "public_network")
-        # Report on send and receive performance
-        if [ $repeat -eq 2 ]
+        # Report on send and receive throughput
+        if [ "$repeat" -eq 2 ]
         then
           # First repeat - concatenate receive performance per node
           perfdata="$perfdata node${num_nodes}_received=${i}B;${warn_thresh};${crit_thresh};0;"
+
+          # Sum up throughput for output
+          count_metric_1=$(echo "${count_metric_1}+${i}" | bc)
         else
           # Second repeat - concatenate send performance per node
           perfdata="$perfdata node${num_nodes}_sent=${i}B;${warn_thresh};${crit_thresh};0;"
+
+          # Sum up throughput for output
+          count_metric_2=$(echo "${count_metric_2}+${i}" | bc)
         fi
+
+        # Produce output
+        output="Total received ${count_metric_1}B/s sent ${count_metric_2}B/s"
       ;;
       "gpfs_throughput")
-        # Report on read and write performance
+        # Report on read and write throughput
         if [ "$perfdata" == "" ]
         then
-          # First metric
+          # First metric - concatenate read performance
           perfdata=" read=${i}B;${warn_thresh};${crit_thresh};0;"
+
+          # Produce output
+          output="Total read ${i}B/s"
         else
-          # Second metric
+          # Second metric - concatenate write performance
           perfdata="$perfdata write=${i}B;${warn_thresh};${crit_thresh};0;"
+
+          # Produce output
+          output="$output write ${i}B/s"
         fi
       ;;
     esac
@@ -314,5 +362,5 @@ done # while [ $repeat -gt 0 ]
 rm $tmp_file
 
 # Produce Nagios output
-echo "PERFDATA OK |$perfdata"
+echo "PERFDATA OK - $output |$perfdata"
 exit $return_code
