@@ -75,10 +75,10 @@
 # Modify the following filenames to match your environment
 
 # Path to the SSH private key file used for authentication: (create a private/public key pair with the 'ssh-keygen' command)
-identity_file="$HOME/.ssh/id_rsa" # Be sure this is readable by Nagios user!
+identity_file="$HOME/.ssh/id_rsa"  # Be sure this is readable by Nagios user!
 
 # Path to a temporary file holding the remote command output while it is being parsed by the script:
-tmp_file="/tmp/check_sonas_health_$RANDOM.tmp" # Be sure that this is writable by Nagios user!
+tmp_file="/tmp/check_sonas_health_$RANDOM.tmp"  # Be sure that this is writable by Nagios user!
 
 ####################################
 ### Do not edit below this line! ###
@@ -165,18 +165,18 @@ case "$mode" in
     # Parse remote command output
     while read line
     do
-      if [ $(echo "$line" | cut -d : -f 7) != "V7000" ] # Ignore V7000 sensors
+      if [ $(echo "$line" | cut -d : -f 7) != "V7000" ]  # Ignore V7000 sensors
       then
         case $(echo "$line" | cut -d : -f 9) in
-          OK) # Sensor OK state -> do nothing
+          OK)  # Sensor OK state -> do nothing
           ;;
-          WARNING) # Sensor WARNING state
+          WARNING)  # Sensor WARNING state
             if [ "$return_code" -lt 1 ]; then return_code=1; fi
             # Append sensor message to output
             if [ -n "$return_message" ]; then return_message="$return_message +++ "; fi
             return_message="${return_message}FILE WARNING - [`echo $line | cut -d : -f 7`:`echo $line | cut -d : -f 8`] `echo $line | cut -d : -f 10`"
           ;;
-          ERROR) # Sensor ERROR state
+          ERROR)  # Sensor ERROR state
             if [ "$return_code" -lt 2 ]; then return_code=2; fi
             # Append sensor message to output
             if [ -n "$return_message" ]; then return_message="$return_message +++ "; fi
@@ -207,15 +207,15 @@ case "$mode" in
     while read line
     do
       case $(echo "$line" | cut -d : -f 10) in
-        message) # Sensor OK state -> do nothing
+        message)  # Sensor OK state -> do nothing
         ;;
-        warning) # Sensor WARNING state
+        warning)  # Sensor WARNING state
           if [ "$return_code" -lt 1 ]; then return_code=1; fi
           # Append sensor message to output
           if [ -n "$return_message" ]; then return_message="$return_message +++ "; fi
           return_message="${return_message}BLOCK WARNING - [`echo $line | cut -d : -f 8`:`echo $line | cut -d : -f 9`] `echo $line | cut -d : -f 11`"
         ;;
-        alert) # Sensor ERROR state
+        alert)  # Sensor ERROR state
           if [ "$return_code" -lt 2 ]; then return_code=2; fi
           # Append sensor message to output
           if [ -n "$return_message" ]; then return_message="$return_message +++ "; fi
