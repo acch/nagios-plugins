@@ -75,16 +75,16 @@
 #   define service{
 #     host_name            <your_system>
 #     service_description  NETWORK Throughput
-#     check_command        check_sonas_perfdata!nagios!public_network!10000!20000
+#     check_command        check_sonas_perfdata!nagios!public_network!10000000!20000000
 #   }
 #   define service{
 #     host_name            <your_system>
 #     service_description  GPFS Throughput
-#     check_command        check_sonas_perfdata!nagios!gpfs_throughput!10000!20000
+#     check_command        check_sonas_perfdata!nagios!gpfs_throughput!10000000!20000000
 #   }
 
 # Version History:
-# 1.0    15.02.2016    Initial Release
+# 1.0    02.3.2016    Initial Release
 
 #####################
 ### Configuration ###
