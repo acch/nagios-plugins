@@ -68,18 +68,17 @@
 #####################
 
 # Warning threshold (number of warnings per minute)
-warn_thresh=10
+warn_thresh=10  # This is the default which can be overridden with commandline parameters
 # Critical threshold (number of warnings per minute)
-crit_thresh=100
+crit_thresh=100  # This is the default which can be overridden with commandline parameters
 
 # Due to the Storwize V7000 Unified / SONAS security mechanisms we need to provide the password in clear text
-# Ensure that the actual password is followed by "\n"
-password="secret\n"
+password="secret\n"  # Ensure that the actual password is followed by "\n"
 
 # Modify the following filenames to match your environment
 
 # Path to a temporary file holding the remote command output while it is being parsed by the script:
-tmp_file="/tmp/check_sonas_vfswarnings_$RANDOM.tmp" # Be sure that this is writable by Nagios user!
+tmp_file="/tmp/check_sonas_vfswarnings_$RANDOM.tmp"  # Be sure that this is writable by Nagios user!
 
 ####################################
 ### Do not edit below this line! ###
@@ -173,7 +172,7 @@ if [ $? -ne 0 ]; then error_login; fi
 time_current=$(date +'%s')
 interval_s=$(( time_current - time_lastcheck ))
 interval_m=$(( interval_s / 60 ))
-(( interval_m -= 1 )) # skip first minute - it would otherwise be counted twice
+(( interval_m -= 1 ))  # skip first minute - it would otherwise be counted twice
 
 # Initialize counter
 num_warnings=0

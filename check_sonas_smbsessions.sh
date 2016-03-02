@@ -63,18 +63,17 @@
 #####################
 
 # Warning threshold (number of sessions per node)
-warn_thresh=2000
+warn_thresh=2000  # This is the default which can be overridden with commandline parameters
 # Critical threshold (number of sessions per node)
-crit_thresh=4000
+crit_thresh=4000  # This is the default which can be overridden with commandline parameters
 
 # Due to the Storwize V7000 Unified / SONAS security mechanisms we need to provide the password in clear text
-# Ensure that the actual password is followed by "\n"
-password="secret\n"
+password="secret\n"  # Ensure that the actual password is followed by "\n"
 
 # Modify the following filenames to match your environment
 
 # Path to a temporary file holding the remote command output while it is being parsed by the script:
-tmp_file="/tmp/check_sonas_smbsessions_$RANDOM.tmp" # Be sure that this is writable by Nagios user!
+tmp_file="/tmp/check_sonas_smbsessions_$RANDOM.tmp"  # Be sure that this is writable by Nagios user!
 
 ####################################
 ### Do not edit below this line! ###
