@@ -296,11 +296,11 @@ do
         #output="Max. CPU utilization ${output}%"
 
         # Check if utilization is above threshold
-        if [ "$utilization" -ge "$crit_thresh" ] && [ "$return_code" -lt 2 ]
+        if [ $(echo "${utilization}>=${crit_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 2 ]
         then
           return_code=2
           return_status="CRITICAL"
-        elif [ "$utilization" -ge "$warn_thresh" ] && [ "$return_code" -lt 1 ]
+        elif [ $(echo "${utilization}>=${warn_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 1 ]
         then
           return_code=1
           return_status="WARNING"
@@ -325,11 +325,11 @@ do
         #output="Max. IO wait ${output}%"
 
         # Check if utilization is above threshold
-        if [ "$i" -ge "$crit_thresh" ] && [ "$return_code" -lt 2 ]
+        if [ $(echo "${i}>=${crit_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 2 ]
         then
           return_code=2
           return_status="CRITICAL"
-        elif [ "$i" -ge "$warn_thresh" ] && [ "$return_code" -lt 1 ]
+        elif [ $(echo "${i}>=${warn_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 1 ]
         then
           return_code=1
           return_status="WARNING"
@@ -356,11 +356,11 @@ do
         output="Total received $(echo "scale=2; ${count_metric_1}/1024/1024" | bc) MB/s sent $(echo "scale=2; ${count_metric_2}/1024/1024" | bc) MB/s"
 
         # Check if throughput is above threshold
-        if [ "$i" -ge "$crit_thresh" ] && [ "$return_code" -lt 2 ]
+        if [ $(echo "${i}>=${crit_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 2 ]
         then
           return_code=2
           return_status="CRITICAL"
-        elif [ "$i" -ge "$warn_thresh" ] && [ "$return_code" -lt 1 ]
+        elif [ $(echo "${i}>=${warn_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 1 ]
         then
           return_code=1
           return_status="WARNING"
@@ -384,11 +384,11 @@ do
         fi
 
         # Check if throughput is above threshold
-        if [ "$i" -ge "$crit_thresh" ] && [ "$return_code" -lt 2 ]
+        if [ $(echo "${i}>=${crit_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 2 ]
         then
           return_code=2
           return_status="CRITICAL"
-        elif [ "$i" -ge "$warn_thresh" ] && [ "$return_code" -lt 1 ]
+        elif [ $(echo "${i}>=${warn_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 1 ]
         then
           return_code=1
           return_status="WARNING"
