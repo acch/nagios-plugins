@@ -81,7 +81,7 @@ tmp_file="/tmp/check_sonas_smbsessions_$RANDOM.tmp" # Be sure that this is writa
 ####################################
 
 error_usage () {
-  echo "Usage: $0 -H <host_address> -u <username>"
+  echo "Usage: $0 -H <host_address> -u <username> [-w <warning_threshold>] [-c <critical_threshold>]"
   exit 3
 }
 
@@ -98,13 +98,15 @@ error_response () {
 }
 
 # Check number of commandline options
-if [ $# -ne 4 ]; then error_usage; fi
+if [ $# -ne 4 ] && [ $# -ne 6 ] && [ $# -ne 8 ]; then error_usage; fi
 
 # Check commandline options
-while getopts 'H:u:' OPT; do
+while getopts 'H:u:w:c:' OPT; do
   case $OPT in
     H) hostaddress=$OPTARG ;;
     u) username=$OPTARG ;;
+    w) warn_thresh=$OPTARG ;;
+    c) crit_thresh=$OPTARG ;;
     *) error_usage ;;
   esac
 done

@@ -86,7 +86,7 @@ tmp_file="/tmp/check_sonas_vfswarnings_$RANDOM.tmp" # Be sure that this is writa
 ####################################
 
 error_usage () {
-  echo "Usage: $0 -H <host_address> -u <username> -l \$LASTSERVICECHECK\$"
+  echo "Usage: $0 -H <host_address> -u <username> -l \$LASTSERVICECHECK\$  [-w <warning_threshold>] [-c <critical_threshold>]"
   exit 3
 }
 
@@ -103,14 +103,16 @@ error_response () {
 }
 
 # Check number of commandline options
-if [ $# -ne 6 ]; then error_usage; fi
+if [ $# -ne 6 ] && [ $# -ne 8 ] && [ $# -ne 10 ]; then error_usage; fi
 
 # Check commandline options
-while getopts 'H:u:l:' OPT; do
+while getopts 'H:u:l:w:c:' OPT; do
   case $OPT in
     H) hostaddress=$OPTARG ;;
     u) username=$OPTARG ;;
     l) time_lastcheck=$OPTARG ;;
+    w) warn_thresh=$OPTARG ;;
+    c) crit_thresh=$OPTARG ;;
     *) error_usage ;;
   esac
 done
