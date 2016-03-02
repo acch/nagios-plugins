@@ -157,7 +157,7 @@ then
 fi
 
 # Check if identity file is readable
-if [ ! -r $identity_file ]
+if [ ! -r "$identity_file" ]
 then
   echo "${identity_file} is not readable - please adjust its path!"
   exit 3
@@ -181,6 +181,7 @@ rsh="/usr/bin/ssh \
 
 # Initialize return code
 return_code=0
+return_status="OK"
 
 # Initialize performance data and output
 perfdata=""
@@ -278,7 +279,7 @@ do
         utilization=$(echo "100-${i}" | bc)
 
         # Concatenate performance data per node
-        perfdata="$perfdata node${num_nodes}=${utilization}%;${warn_thresh};${crit_thresh};0;100"
+        perfdata="${perfdata} node${num_nodes}=${utilization}%;${warn_thresh};${crit_thresh};0;100"
 
         # Calculate max utilization for output
         if [ $(echo "${utilization}>${count_metric_1}" | bc) -eq 1 ]
@@ -293,10 +294,21 @@ do
         #sum_metric=$(echo "${sum_metric}+${utilization}" | bc)
         #output=$(echo "${sum_metric}/${num_nodes}" | bc)
         #output="Max. CPU utilization ${output}%"
+
+        # Check if utilization is above threshold
+        if [ "$utilization" -ge "$crit_thresh" ] && [ "$return_code" -lt 2 ]
+        then
+          return_code=2
+          return_status="CRITICAL"
+        elif [ "$utilization" -ge "$warn_thresh" ] && [ "$return_code" -lt 1 ]
+        then
+          return_code=1
+          return_status="WARNING"
+        fi
       ;;
       "cpu_iowait")
         # Concatenate performance data per node
-        perfdata="$perfdata node${num_nodes}=${i}%;${warn_thresh};${crit_thresh};0;"
+        perfdata="${perfdata} node${num_nodes}=${i}%;${warn_thresh};${crit_thresh};0;"
 
         # Calculate max utilization for output
         if [ $(echo "${i}>${count_metric_1}" | bc) -eq 1 ]
@@ -311,19 +323,30 @@ do
         #sum_metric=$(echo "${sum_metric}+${i}" | bc)
         #output=$(echo "${sum_metric}/${num_nodes}" | bc)
         #output="Max. IO wait ${output}%"
+
+        # Check if utilization is above threshold
+        if [ "$i" -ge "$crit_thresh" ] && [ "$return_code" -lt 2 ]
+        then
+          return_code=2
+          return_status="CRITICAL"
+        elif [ "$i" -ge "$warn_thresh" ] && [ "$return_code" -lt 1 ]
+        then
+          return_code=1
+          return_status="WARNING"
+        fi
       ;;
       "public_network")
         # Report on send and receive throughput
         if [ "$repeat" -eq 2 ]
         then
           # First repeat - concatenate receive performance per node
-          perfdata="$perfdata node${num_nodes}_received=${i}B;${warn_thresh};${crit_thresh};0;"
+          perfdata="${perfdata} node${num_nodes}_received=${i}B;${warn_thresh};${crit_thresh};0;"
 
           # Sum up throughput for output
           count_metric_1=$(echo "${count_metric_1}+${i}" | bc)
         else
           # Second repeat - concatenate send performance per node
-          perfdata="$perfdata node${num_nodes}_sent=${i}B;${warn_thresh};${crit_thresh};0;"
+          perfdata="${perfdata} node${num_nodes}_sent=${i}B;${warn_thresh};${crit_thresh};0;"
 
           # Sum up throughput for output
           count_metric_2=$(echo "${count_metric_2}+${i}" | bc)
@@ -331,6 +354,17 @@ do
 
         # Produce output
         output="Total received $(echo "scale=2; ${count_metric_1}/1024/1024" | bc) MB/s sent $(echo "scale=2; ${count_metric_2}/1024/1024" | bc) MB/s"
+
+        # Check if throughput is above threshold
+        if [ "$i" -ge "$crit_thresh" ] && [ "$return_code" -lt 2 ]
+        then
+          return_code=2
+          return_status="CRITICAL"
+        elif [ "$i" -ge "$warn_thresh" ] && [ "$return_code" -lt 1 ]
+        then
+          return_code=1
+          return_status="WARNING"
+        fi
       ;;
       "gpfs_throughput")
         # Report on read and write throughput
@@ -343,10 +377,21 @@ do
           output="Total read $(echo "scale=2; ${i}/1024/1024" | bc) MB/s"
         else
           # Second metric - concatenate write performance
-          perfdata="$perfdata write=${i}B;${warn_thresh};${crit_thresh};0;"
+          perfdata="${perfdata} write=${i}B;${warn_thresh};${crit_thresh};0;"
 
           # Produce output
-          output="$output write $(echo "scale=2; ${i}/1024/1024" | bc) MB/s"
+          output="${output} write $(echo "scale=2; ${i}/1024/1024" | bc) MB/s"
+        fi
+
+        # Check if throughput is above threshold
+        if [ "$i" -ge "$crit_thresh" ] && [ "$return_code" -lt 2 ]
+        then
+          return_code=2
+          return_status="CRITICAL"
+        elif [ "$i" -ge "$warn_thresh" ] && [ "$return_code" -lt 1 ]
+        then
+          return_code=1
+          return_status="WARNING"
         fi
       ;;
     esac
@@ -362,5 +407,5 @@ done # while [ $repeat -gt 0 ]
 rm $tmp_file
 
 # Produce Nagios output
-echo "PERFDATA OK - $output |$perfdata"
+echo "PERFDATA ${return_status} - ${output} |${perfdata}"
 exit $return_code
