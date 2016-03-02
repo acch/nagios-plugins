@@ -56,7 +56,7 @@
 #   }
 
 # Version History:
-# 1.0    26.2.2016    Initial Release
+# 1.0    02.3.2016    Initial Release
 
 #####################
 ### Configuration ###
@@ -145,6 +145,7 @@ rsh="/usr/bin/ssh \
 
 # Initialize return code
 return_code=0
+return_status="OK"
 
 ################################
 # Check number of SMB sessions #
@@ -174,13 +175,23 @@ do
   # Sum up total sessions
   (( sum_sessions += sessions ))
 
+  # Check if sessions are above threshold
+  if [ "$sessions" -ge "$crit_thresh" ] && [ "$return_code" -lt 2 ]
+  then
+    return_code=2
+    return_status="CRITICAL"
+  elif [ "$sessions" -ge "$warn_thresh" ] && [ "$return_code" -lt 1 ]
+    return_code=1
+    return_status="WARNING"
+  fi
+
   # Concatenate performance data per node
-  perfdata="$perfdata node${num_nodes}=${sessions}Sessions;${warn_thresh};${crit_thresh};0;"
+  perfdata="${perfdata} node${num_nodes}=${sessions}Sessions;${warn_thresh};${crit_thresh};0;"
 done
 
 # Cleanup
 rm $tmp_file
 
 # Produce Nagios output
-echo "SMB OK - $sum_sessions sessions currently |$perfdata"
+echo "SMB ${return_status} - ${sum_sessions} sessions currently |${perfdata}"
 exit $retcode

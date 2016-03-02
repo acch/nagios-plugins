@@ -61,7 +61,7 @@
 #   }
 
 # Version History:
-# 1.0    12.2.2016    Initial Release
+# 1.0    02.3.2016    Initial Release
 
 #####################
 ### Configuration ###
@@ -151,6 +151,7 @@ rsh="/usr/bin/ssh \
 
 # Initialize return code
 return_code=0
+return_status="OK"
 
 ################################
 # Check number of VFS warnings #
@@ -191,6 +192,16 @@ do
   # Sum up thresholds
   (( warn_thresh_abs += warn_thresh ))
   (( crit_thresh_abs += crit_thresh ))
+
+  # Check if warnings are above threshold
+  if [ "$warnings" -ge "$crit_thresh" ] && [ "$return_code" -lt 2 ]
+  then
+    return_code=2
+    return_status="CRITICAL"
+  elif [ "$warnings" -ge "$warn_thresh" ] && [ "$return_code" -lt 1 ]
+    return_code=1
+    return_status="WARNING"
+  fi
 done
 
 # Cleanup
@@ -198,5 +209,5 @@ rm $tmp_file
 
 # Produce Nagios output
 (( interval_m += 1 ))
-echo "VFS OK - ${num_warnings} warnings during last ${interval_m}m | warnings=${num_warnings}Warnings;${warn_thresh_abs};${crit_thresh_abs};0;"
+echo "VFS ${return_status} - ${num_warnings} warnings during last ${interval_m}m | warnings=${num_warnings}Warnings;${warn_thresh_abs};${crit_thresh_abs};0;"
 exit $retcode
