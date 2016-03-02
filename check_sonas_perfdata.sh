@@ -93,10 +93,10 @@
 # Modify the following filenames to match your environment
 
 # Path to the SSH private key file used for authentication: (create a private/public key pair with the 'ssh-keygen' command)
-identity_file="$HOME/.ssh/id_rsa" # Be sure this is readable by Nagios user!
+identity_file="$HOME/.ssh/id_rsa"  # Be sure this is readable by Nagios user!
 
 # Path to a temporary file holding the remote command output while it is being parsed by the script:
-tmp_file="/tmp/check_sonas_perfdata_$RANDOM.tmp" # Be sure that this is writable by Nagios user!
+tmp_file="/tmp/check_sonas_perfdata_$RANDOM.tmp"  # Be sure that this is writable by Nagios user!
 
 ####################################
 ### Do not edit below this line! ###
