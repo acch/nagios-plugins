@@ -199,6 +199,7 @@ do
     return_code=2
     return_status="CRITICAL"
   elif [ "$warnings" -ge "$warn_thresh" ] && [ "$return_code" -lt 1 ]
+  then
     return_code=1
     return_status="WARNING"
   fi
@@ -210,4 +211,4 @@ rm $tmp_file
 # Produce Nagios output
 (( interval_m += 1 ))
 echo "VFS ${return_status} - ${num_warnings} warnings during last ${interval_m}m | warnings=${num_warnings}Warnings;${warn_thresh_abs};${crit_thresh_abs};0;"
-exit $retcode
+exit $return_code

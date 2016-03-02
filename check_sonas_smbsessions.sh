@@ -181,6 +181,7 @@ do
     return_code=2
     return_status="CRITICAL"
   elif [ "$sessions" -ge "$warn_thresh" ] && [ "$return_code" -lt 1 ]
+  then
     return_code=1
     return_status="WARNING"
   fi
@@ -194,4 +195,4 @@ rm $tmp_file
 
 # Produce Nagios output
 echo "SMB ${return_status} - ${sum_sessions} sessions currently |${perfdata}"
-exit $retcode
+exit $return_code
