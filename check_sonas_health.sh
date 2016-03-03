@@ -114,6 +114,9 @@ while getopts 'H:u:m:' OPT; do
   esac
 done
 
+# Check for mandatory options
+if [ ! -n "$hostaddress" ] || [ ! -n "$username" ] || [ ! -n "$mode" ]; then error_usage; fi
+
 #################
 # Sanity checks #
 #################

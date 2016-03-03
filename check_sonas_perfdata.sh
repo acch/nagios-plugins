@@ -84,7 +84,7 @@
 #   }
 
 # Version History:
-# 1.0    02.3.2016    Initial Release
+# 1.0    03.3.2016    Initial Release
 
 #####################
 ### Configuration ###
@@ -138,6 +138,9 @@ while getopts 'H:u:m:w:c:' OPT; do
     *) error_usage ;;
   esac
 done
+
+# Check for mandatory options
+if [ ! -n "$hostaddress" ] || [ ! -n "$username" ] || [ ! -n "$metric" ] || [ ! -n "$warn_thresh" ] || [ ! -n "$crit_thresh" ]; then error_usage; fi
 
 #################
 # Sanity checks #
