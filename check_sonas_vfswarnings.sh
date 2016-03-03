@@ -166,6 +166,7 @@ cmd="grep -e 'WARNING: VFS call.*took unexpectedly long' /var/log/messages"
 /usr/bin/expect -c "
   spawn ${rsh} sc onnode all \'${cmd}\'
   expect {
+    \"Permission denied\" { exit 1 }
     -nocase \"password\" { send ${password}; exp_continue }
   }" &> $tmp_file
 

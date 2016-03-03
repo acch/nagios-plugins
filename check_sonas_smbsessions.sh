@@ -159,6 +159,7 @@ cmd="grep 'children' /var/log/messages | tail -n 1"
 /usr/bin/expect -c "
   spawn ${rsh} sc onnode all \'${cmd}\'
   expect {
+    \"Permission denied\" { exit 1 }
     -nocase \"password\" { send ${password}; exp_continue }
   }" &> $tmp_file
 
