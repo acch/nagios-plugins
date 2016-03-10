@@ -90,7 +90,7 @@ error_usage () {
 }
 
 error_login () {
-  echo "Error executing remote command - `cat $tmp_file`"
+  echo "Error executing remote command - [$rsh] `cat $tmp_file | tail -n +2`"
   rm $tmp_file
   exit 3
 }
@@ -164,6 +164,7 @@ return_status="OK"
 #cmd="grep 'cnscm' /var/log/messages"
 cmd="grep -e 'WARNING: VFS call.*took unexpectedly long' /var/log/messages"
 /usr/bin/expect -c "
+  set timeout 20
   spawn ${rsh} sc onnode all \'${cmd}\'
   expect {
     \"Permission denied\" { exit 1 }
