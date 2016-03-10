@@ -85,7 +85,7 @@ error_usage () {
 }
 
 error_login () {
-  echo "Error executing remote command - [$rsh] `cat $tmp_file`"
+  echo "Error executing remote command - `cat $tmp_file`"
   rm $tmp_file
   exit 3
 }
@@ -160,11 +160,16 @@ cmd="grep 'children' /var/log/messages | tail -n 1"
   spawn ${rsh} sc onnode all \'${cmd}\'
   expect {
     \"Permission denied\" { exit 1 }
+    \"No route to host\" { exit 1 }
+    \"Connection timed out\" { exit 1 }
     -nocase \"password\" { send ${password}; exp_continue }
   }" &> $tmp_file
 
 # Check remote command return code
 if [ $? -ne 0 ]; then error_login; fi
+
+# Check results of remote command
+if [ $(cat $tmp_file | wc -l) -le 1 ]; then error_login; fi
 
 # Initialize counter
 num_nodes=0
