@@ -56,7 +56,7 @@
 #   define service{
 #     host_name            <your_system>
 #     service_description  Fileset Inodes
-#     check_command        check_sonas_health!nagios!filesystem!fileset
+#     check_command        check_sonas_inodes!nagios!filesystem!fileset
 #   }
 
 # Version History:
@@ -188,7 +188,7 @@ then
 fi
 
 # Check remote command return code
-if [ "$rc" -ne 0 ]; then error_login; fi
+if [ $rc -ne 0 ]; then error_login; fi
 
 # Parse remote command output
 while read line
@@ -205,7 +205,7 @@ do
 
     # Produce output
     utilization=$(echo "100*${inodes_used}/${inodes_max}" | bc)
-    output="Inodes used ${inodes_used} / ${inodes_max} (${utilization} %)"
+    output="${utilization} % inodes used (${inodes_used} out of ${inodes_max})"
 
     # Produce performance data
     perfdata="inodes=${utilization}%;${warn_thresh};${crit_thresh};0;100"
