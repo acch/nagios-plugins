@@ -33,6 +33,7 @@
 # OpenVZ Linux containers have a notion of 'guaranteed memory' which is typically lower than the total amount of memory available.
 # Since memory is shared among containers, allocating more than the guaranteed amount may eventually fail. This typically results in transient errors which are extremely hard to identify.
 # This bash script reports on and checks memory usage of an OpenVZ container, and warns if it exceeds the amount of guaranteed memory.
+# The plugin produces Nagios performance data so it can be graphed.
 
 # Additional detail on the monitored parameters can be found here:
 #   http://wiki.openvz.org/UBC_primary_parameters#vmguarpages

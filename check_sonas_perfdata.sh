@@ -34,6 +34,7 @@
 # This bash script reports on various performance metrics of an IBM Storwize V7000 Unified / SONAS system, using the 'lsperfdata' CLI command.
 # For a list of supported metrics run the script without any commandline arguments.
 # The script uses the performance center service which needs to be running on all nodes of Storwize V7000 Unified / SONAS.
+# The plugin produces Nagios performance data so it can be graphed.
 
 # The following CLI command is used to retrieve performance data:
 # lsperfdata
