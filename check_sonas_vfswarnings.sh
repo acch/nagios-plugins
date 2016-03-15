@@ -33,6 +33,7 @@
 
 # This bash script reports on the number of VFS warnings logged by Samba in an IBM Storwize V7000 Unified / SONAS system, by evaluating syslog entries in /var/log/messages.
 # Samba logs slow VFS (filesystem) operations into each interface node's syslog. This script detects such messages and adds them up for all nodes.
+# The plugin produces Nagios performance data so it can be graphed.
 
 # Note that this script only evaluates the new syslog entries logged after the last check was run, and requires information on when that was (-l parameter). Such information is available in Nagios via the $LASTSERVICECHECK$ macro.
 
@@ -72,8 +73,10 @@ warn_thresh=10  # This is the default which can be overridden with commandline p
 # Critical threshold (number of warnings per minute)
 crit_thresh=100  # This is the default which can be overridden with commandline parameters
 
-# Due to the Storwize V7000 Unified / SONAS security mechanisms we need to provide the password in clear text
-password="secret\n"  # Ensure that the actual password is followed by "\n"
+# Due to the Storwize V7000 Unified / SONAS security mechanisms we need to provide the password
+# This is a base64 encrypted password string - generate your password string with the following command:
+#   echo "mypassword" | openssl base64
+password="c2VjcmV0Cg=="
 
 # Modify the following filenames to match your environment
 
@@ -170,7 +173,7 @@ cmd="grep -e 'WARNING: VFS call.*took unexpectedly long' /var/log/messages"
     \"Permission denied\" { exit 1 }
     \"No route to host\" { exit 1 }
     \"Connection timed out\" { exit 1 }
-    -nocase \"password\" { send ${password}; exp_continue }
+    -nocase \"password\" { send \"$(echo ${password} | openssl base64 -d)\n\"; exp_continue }
   }" &> $tmp_file
 
 # Check remote command return code

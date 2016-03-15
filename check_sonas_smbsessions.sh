@@ -33,6 +33,7 @@
 
 # This bash script reports on the number of SMB sessions in an IBM Storwize V7000 Unified / SONAS system, by evaluating syslog entries in /var/log/messages.
 # Storwize V7000 Unified / SONAS systems report the current number of sessions to each interface node's syslog. This script collects the current value and adds it up for all nodes.
+# The plugin produces Nagios performance data so it can be graphed.
 
 # The actual code is managed in the following GitHub rebository - please use the Issue Tracker to ask questions, report problems or request enhancements.
 #   https://github.com/acch/nagios-plugins
@@ -67,8 +68,10 @@ warn_thresh=2000  # This is the default which can be overridden with commandline
 # Critical threshold (number of sessions per node)
 crit_thresh=4000  # This is the default which can be overridden with commandline parameters
 
-# Due to the Storwize V7000 Unified / SONAS security mechanisms we need to provide the password in clear text
-password="secret\n"  # Ensure that the actual password is followed by "\n"
+# Due to the Storwize V7000 Unified / SONAS security mechanisms we need to provide the password
+# This is a base64 encrypted password string - generate your password string with the following command:
+#   echo "mypassword" | openssl base64
+password="c2VjcmV0Cg=="
 
 # Modify the following filenames to match your environment
 
@@ -163,7 +166,7 @@ cmd="grep 'children' /var/log/messages | tail -n 1"
     \"Permission denied\" { exit 1 }
     \"No route to host\" { exit 1 }
     \"Connection timed out\" { exit 1 }
-    -nocase \"password\" { send ${password}; exp_continue }
+    -nocase \"password\" { send \"$(echo ${password} | openssl base64 -d)\n\"; exp_continue }
   }" &> $tmp_file
 
 # Check remote command return code
