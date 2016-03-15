@@ -26,12 +26,13 @@
 
 # Name:               Check IBM Storwize V7000 Unified / SONAS Inodes
 # Author:             Achim Christ - achim(dot)christ(at)gmail(dot)com
-# Version:            1.2
+# Version:            1.0
 # Dependencies:       openssh - OpenSSH SSH client (remote login program)
 #                     bc - An arbitrary precision calculator language
 # Website:            https://github.com/acch/nagios-plugins
 
-# This bash script checks the number of used inodes of an IBM Storwize V7000 Unified / SONAS system.
+# This bash script checks the number of used inodes in an IBM Storwize V7000 Unified / SONAS system.
+# The plugin produces Nagios performance data so it can be graphed.
 
 # The actual code is managed in the following GitHub rebository - please use the Issue Tracker to ask questions, report problems or request enhancements.
 #   https://github.com/acch/nagios-plugins
@@ -126,6 +127,12 @@ if [ ! -n "$hostaddress" ] || [ ! -n "$username" ] || [ ! -n "$filesystem" ] || 
 if [ ! -x /usr/bin/ssh ]
 then
   echo "'openssh' not found - please install it!"
+  exit 3
+fi
+
+if [ ! -x /usr/bin/bc ]
+then
+  echo "'bc' not found - please install it!"
   exit 3
 fi
 
