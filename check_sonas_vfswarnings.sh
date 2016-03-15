@@ -164,7 +164,6 @@ return_status="OK"
 ################################
 
 # Execute remote command
-#cmd="grep 'cnscm' /var/log/messages"
 cmd="grep -e 'WARNING: VFS call.*took unexpectedly long' /var/log/messages"
 /usr/bin/expect -c "
   set timeout 20
