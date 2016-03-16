@@ -85,7 +85,7 @@
 #   }
 
 # Version History:
-# 1.0    03.3.2016    Initial Release
+# 1.0    16.3.2016    Initial Release
 
 #####################
 ### Configuration ###
@@ -248,11 +248,11 @@ do
   # Execute remote command
   $rsh $query &> $tmp_file
 
-  # Check remote command return code
-  if [ $? -ne 0 ]; then error_login; fi
+  # Check SSH return code
+  if [ $? -eq 255 ]; then error_login; fi
 
   # Check for performance center errors
-  if grep 'EFSSG0002I' $tmp_file &> /dev/null
+  if grep -q 'EFSSG0002I' $tmp_file
   then
     echo "Error collecting performance data - check if performance center service is running using 'cfgperfcenter'"
     rm $tmp_file

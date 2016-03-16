@@ -162,8 +162,8 @@ case "$mode" in
     # Execute remote command
     $rsh "lshealth -Y | grep -v HEADER" &> $tmp_file
 
-    # Check remote command return code
-    if [ $? -ne 0 ]; then error_login; fi
+    # Check SSH return code
+    if [ $? -eq 255 ]; then error_login; fi
 
     # Parse remote command output
     while read line
@@ -203,8 +203,8 @@ case "$mode" in
     # Execute remote command
     $rsh "lshealth -i STRG -Y | grep -v HEADER" &> $tmp_file
 
-    # Check remote command return code
-    if [ $? -ne 0 ]; then error_login; fi
+    # Check SSH return code
+    if [ $? -eq 255 ]; then error_login; fi
 
     # Parse remote command output
     while read line

@@ -60,7 +60,7 @@
 #   }
 
 # Version History:
-# 1.0    15.3.2016    Initial Release
+# 1.0    16.3.2016    Initial Release
 
 #####################
 ### Configuration ###
@@ -171,12 +171,14 @@ output=""
 fileset_found=0
 
 ##########################
-# Check number of Inodes #
+# Check number of inodes #
 ##########################
 
 # Execute remote command
 $rsh "lsfset ${filesystem} -v -Y | grep -v HEADER" &> $tmp_file
-rc=$?
+
+# Check SSH return code
+if [ $? -eq 255 ]; then error_login; fi
 
 # Check for errors
 if grep -q "EFSSP0010C" $tmp_file
@@ -186,9 +188,6 @@ then
   rm $tmp_file
   exit 3
 fi
-
-# Check remote command return code
-if [ $rc -ne 0 ]; then error_login; fi
 
 # Parse remote command output
 while read line
