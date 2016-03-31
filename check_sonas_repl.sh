@@ -188,7 +188,7 @@ then
   output="Last replication ${last_status}: $(tail -n 1 $tmp_file | cut -d : -f 10)"
 
   # Find last successful replication
-  output="${output} - Last successful replication at \'$(grep 'FINISHED' $tmp_file | tail -n 1 | cut -d ':' -f 11 | sed 's/\./:/g')\'"
+  output="${output} - Last successful replication at '$(grep 'FINISHED' $tmp_file | tail -n 1 | cut -d ':' -f 11 | sed 's/\./:/g')'"
 
 elif [ "$last_status" == "WARNING" ]
 then
@@ -196,12 +196,12 @@ then
   # Last replication warning
   return_status="WARNING"
   return_code=1
-  output="Last replication ${last_status} at \'$(tail -n 1 $tmp_file | cut -d : -f 11)\'"
+  output="Last replication ${last_status} at '$(tail -n 1 $tmp_file | cut -d ':' -f 11)'"
 
 else  # [ $last_status == "FINISHED" ]
 
   # Last replication successful
-  output="Last replication ${last_status} at \'$(tail -n 1 $tmp_file | cut -d : -f 11)\'"
+  output="Last replication ${last_status} at '$(tail -n 1 $tmp_file | cut -d ':' -f 11)'"
 
 fi
 
