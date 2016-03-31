@@ -120,6 +120,9 @@ done
 # Check for mandatory options
 if [ ! -n "$hostaddress" ] || [ ! -n "$username" ] || [ ! -n "$filesystem" ] || [ ! -n "$fileset" ]; then error_usage; fi
 
+# Check if thresholds are numbers
+if ! [[ $warn_thresh =~ ^[[:digit:]]+$ ]] || ! [[ $warn_thresh =~ ^[[:digit:]]+$ ]]; then error_usage; fi
+
 #################
 # Sanity checks #
 #################

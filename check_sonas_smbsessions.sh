@@ -57,7 +57,7 @@
 #   }
 
 # Version History:
-# 1.0    15.3.2016    Initial Release
+# 1.0    31.3.2016    Initial Release
 
 #####################
 ### Configuration ###
@@ -115,6 +115,9 @@ done
 
 # Check for mandatory options
 if [ ! -n "$hostaddress" ] || [ ! -n "$username" ]; then error_usage; fi
+
+# Check if thresholds are numbers
+if ! [[ $warn_thresh =~ ^[[:digit:]]+$ ]] || ! [[ $warn_thresh =~ ^[[:digit:]]+$ ]]; then error_usage; fi
 
 #################
 # Sanity checks #
