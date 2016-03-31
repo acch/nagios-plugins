@@ -189,6 +189,7 @@ rsh="/usr/bin/ssh \
 # Initialize return code
 return_code=0
 return_status="OK"
+return_metric="PERFDATA"
 
 # Initialize performance data and output
 perfdata=""
@@ -343,6 +344,9 @@ do
           return_code=1
           return_status="WARNING"
         fi
+
+        # Report metric in output
+        return_metric="CPU"
       ;;
       "cpu_iowait")
         # Concatenate performance data per node
@@ -372,6 +376,9 @@ do
           return_code=1
           return_status="WARNING"
         fi
+
+        # Report metric in output
+        return_metric="CPU"
       ;;
       "public_network")
         # Report on send and receive throughput
@@ -403,6 +410,9 @@ do
           return_code=1
           return_status="WARNING"
         fi
+
+        # Report metric in output
+        return_metric="NETWORK"
       ;;
       "gpfs_throughput")
         # Report on read and write throughput
@@ -431,6 +441,9 @@ do
           return_code=1
           return_status="WARNING"
         fi
+
+        # Report metric in output
+        return_metric="GPFS"
       ;;
     esac
 
@@ -445,5 +458,5 @@ done  # while [ $repeat -gt 0 ]
 rm $tmp_file
 
 # Produce Nagios output
-echo "PERFDATA ${return_status} - ${output} |${perfdata}"
+echo "${return_metric} ${return_status} - ${output} |${perfdata}"
 exit $return_code
