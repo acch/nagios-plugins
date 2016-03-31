@@ -198,21 +198,42 @@ output=""
 count_metric_1=0
 count_metric_2=0
 
+# Prepare nodename array
+declare -A nodenames
+
+#######################
+# Retrieve node names #
+#######################
+
+# Execute remote command
+$rsh "lsnode -v -Y | grep -v HEADER" &> $tmp_file
+
+# Check SSH return code
+if [ $? -eq 255 ]; then error_login; fi
+
+# Parse remote command output
+while read line
+do
+  # Remember IP and associated nodename
+  nodenames["$(echo $line | cut -d ':' -f 8)"]="$(echo $line | cut -d ':' -f 7)"
+done < $tmp_file
+
+#############################
+# Retrieve performance data #
+#############################
+
 # Query multiple metrics if required
 repeat=1
 while [ "$repeat" -gt 0 ]
 do
-  #############################
-  # Retrieve performance data #
-  #############################
   query=""
   case "$metric" in
     "cpu_utilization")
-      query="lsperfdata -g cpu_idle_usage -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
+      query="lsperfdata -g cpu_idle_usage -t hour -n all | grep -v 'EFSSG1000I'"
       # Retrieves the statistics for the % of CPU spent idle on each of the nodes
     ;;
     "cpu_iowait")
-      query="lsperfdata -g cpu_iowait_usage -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
+      query="lsperfdata -g cpu_iowait_usage -t hour -n all | grep -v 'EFSSG1000I'"
       # Retrieves the statistics for the % CPU spent for waiting for IO to complete on each of the nodes
     ;;
     "public_network")
@@ -222,16 +243,16 @@ do
         repeat=2
 
         # First repeat
-        query="lsperfdata -g public_network_bytes_received -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
+        query="lsperfdata -g public_network_bytes_received -t hour -n all | grep -v 'EFSSG1000I'"
         # Retrieves the total number of bytes received on all the client network interface of the nodes
       else
         # Second repeat
-        query="lsperfdata -g public_network_bytes_sent -t hour -n all | grep -v 'EFSSG1000I' | tail -n 1"
+        query="lsperfdata -g public_network_bytes_sent -t hour -n all | grep -v 'EFSSG1000I'"
         # Retrieves the total number of bytes sent on all the client network interface of the nodes
       fi
     ;;
     "gpfs_throughput")
-      query="lsperfdata -g cluster_throughput -t hour | grep -v 'EFSSG1000I' | tail -n 1"
+      query="lsperfdata -g cluster_throughput -t hour | grep -v 'EFSSG1000I'"
       # Retrieves the number of bytes read and written across all the filesystems on all the nodes of the GPFS cluster
     ;;
 
@@ -262,8 +283,9 @@ do
     exit 3
   fi
 
-  # Extract performance data from output
-  perfdata_raw=$(cat "$tmp_file" | cut -d ',' -f 3- | sed 's/,/ /g')
+  # Extract header and performance data from output
+  header_raw=$(cat "$tmp_file" | head -n 1 | cut -d ',' -f 3-)
+  perfdata_raw=$(cat "$tmp_file" | tail -n 1 | cut -d ',' -f 3- | sed 's/,/ /g')
 
   # Check extracted performance data
   if [ "$perfdata_raw" == "" ]
@@ -277,6 +299,10 @@ do
   # Compute performance data and output
   for i in $perfdata_raw
   do
+    # Extract node's IP from header
+    nodeindx=$(( num_nodes * 2 + 1 ))
+    nodename=${nodenames["$(echo $header_raw | cut -d ',' -f $nodeindx | sed 's/\"//')"]}
+
     # Count number of nodes
     (( num_nodes += 1 ))
 
@@ -286,7 +312,7 @@ do
         utilization=$(echo "100-${i}" | bc)
 
         # Concatenate performance data per node
-        perfdata="${perfdata} node${num_nodes}=${utilization}%;${warn_thresh};${crit_thresh};0;100"
+        perfdata="${perfdata} ${nodename}=${utilization}%;${warn_thresh};${crit_thresh};0;100"
 
         # Calculate max utilization for output
         if [ $(echo "${utilization}>${count_metric_1}" | bc) -eq 1 ]
@@ -315,7 +341,7 @@ do
       ;;
       "cpu_iowait")
         # Concatenate performance data per node
-        perfdata="${perfdata} node${num_nodes}=${i}%;${warn_thresh};${crit_thresh};0;"
+        perfdata="${perfdata} ${nodename}=${i}%;${warn_thresh};${crit_thresh};0;"
 
         # Calculate max utilization for output
         if [ $(echo "${i}>${count_metric_1}" | bc) -eq 1 ]
@@ -347,13 +373,13 @@ do
         if [ "$repeat" -eq 2 ]
         then
           # First repeat - concatenate receive performance per node
-          perfdata="${perfdata} node${num_nodes}_received=${i}B;${warn_thresh};${crit_thresh};0;"
+          perfdata="${perfdata} ${nodename}_received=${i}B;${warn_thresh};${crit_thresh};0;"
 
           # Sum up throughput for output
           count_metric_1=$(echo "${count_metric_1}+${i}" | bc)
         else
           # Second repeat - concatenate send performance per node
-          perfdata="${perfdata} node${num_nodes}_sent=${i}B;${warn_thresh};${crit_thresh};0;"
+          perfdata="${perfdata} ${nodename}_sent=${i}B;${warn_thresh};${crit_thresh};0;"
 
           # Sum up throughput for output
           count_metric_2=$(echo "${count_metric_2}+${i}" | bc)

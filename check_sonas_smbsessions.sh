@@ -176,17 +176,20 @@ cmd="grep 'children' /var/log/messages | tail -n 1"
 if [ $? -ne 0 ]; then error_login; fi
 
 # Check results of remote command
-if [ $(cat $tmp_file | wc -l) -le 1 ]; then error_login; fi
+if [ $(cat $tmp_file | wc -l) -le 2 ]; then error_login; fi
 
 # Initialize counter
-num_nodes=0
 sum_sessions=0
 
 # Parse results
-for sessions in $(grep --no-group-separator -A 1 'NODE' $tmp_file | grep -v 'NODE' | awk '{print $4}')
+IFS=$'\n'  # make newlines the only field separator
+for sessions_raw in $(grep --no-group-separator -A 1 'NODE' $tmp_file | grep -v 'NODE')
 do
-  # Count number of nodes
-  (( num_nodes += 1 ))
+  # Extract number of sessions
+  sessions=$(echo "$sessions_raw" | awk '{print $4}')
+
+  # Extract nodename
+  nodename=$(echo "$sessions_raw" | awk '{print $2}')
 
   # Sum up total sessions
   (( sum_sessions += sessions ))
@@ -203,7 +206,7 @@ do
   fi
 
   # Concatenate performance data per node
-  perfdata="${perfdata} node${num_nodes}=${sessions}Sessions;${warn_thresh};${crit_thresh};0;"
+  perfdata="${perfdata} ${nodename}=${sessions}Sessions;${warn_thresh};${crit_thresh};0;"
 done
 
 # Cleanup
