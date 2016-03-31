@@ -180,7 +180,7 @@ num_nodes=0
 sum_sessions=0
 
 # Parse results
-for sessions in $(grep --no-group-separator -A 1 "NODE" $tmp_file | grep -v "NODE" | awk '{print $4}')
+for sessions in $(grep --no-group-separator -A 1 'NODE' $tmp_file | grep -v 'NODE' | awk '{print $4}')
 do
   # Count number of nodes
   (( num_nodes += 1 ))
