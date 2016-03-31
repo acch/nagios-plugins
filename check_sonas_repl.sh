@@ -30,7 +30,8 @@
 # Dependencies:       openssh - OpenSSH SSH client (remote login program)
 # Website:            https://github.com/acch/nagios-plugins
 
-# This bash script checks the status of the last replication of an IBM Storwize V7000 Unified / SONAS system.
+# This bash script checks the status of the last replication task of an IBM Storwize V7000 Unified / SONAS system.
+# If the last replication for the given filesystem was unsuccessful, then the time at which the last successful replication completed is reported as well.
 
 # The actual code is managed in the following GitHub rebository - please use the Issue Tracker to ask questions, report problems or request enhancements.
 #   https://github.com/acch/nagios-plugins
@@ -58,7 +59,7 @@
 #   }
 
 # Version History:
-# 1.0    16.3.2016    Initial Release
+# 1.0    31.3.2016    Initial Release
 
 #####################
 ### Configuration ###
@@ -97,7 +98,7 @@ error_response () {
 if [ $# -ne 6 ]; then error_usage; fi
 
 # Check commandline options
-while getopts 'H:u:F:f:w:c:' OPT; do
+while getopts 'H:u:F:' OPT; do
   case $OPT in
     H) hostaddress=$OPTARG ;;
     u) username=$OPTARG ;;

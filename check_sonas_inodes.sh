@@ -31,7 +31,8 @@
 #                     bc - An arbitrary precision calculator language
 # Website:            https://github.com/acch/nagios-plugins
 
-# This bash script checks the number of used inodes in an IBM Storwize V7000 Unified / SONAS system.
+# This bash script reports on the number of inodes in an IBM Storwize V7000 Unified / SONAS system.
+# The number of used and maximum inodes for the given fileset in the given filesystem is reported, along with a utilization percentage.
 # The plugin produces Nagios performance data so it can be graphed.
 
 # The actual code is managed in the following GitHub rebository - please use the Issue Tracker to ask questions, report problems or request enhancements.
@@ -60,7 +61,7 @@
 #   }
 
 # Version History:
-# 1.0    16.3.2016    Initial Release
+# 1.0    31.3.2016    Initial Release
 
 #####################
 ### Configuration ###
@@ -181,7 +182,7 @@ $rsh "lsfset ${filesystem} -v -Y | grep -v HEADER" &> $tmp_file
 if [ $? -eq 255 ]; then error_login; fi
 
 # Check for errors
-if grep -q "EFSSP0010C" $tmp_file
+if grep -q 'EFSSP0010C' $tmp_file
 then
   # EFSSP0010C - filesystem does not exist
   echo "Filesystem ${filesystem} not found!"
