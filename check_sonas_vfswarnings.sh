@@ -120,10 +120,10 @@ while getopts 'H:u:l:w:c:' OPT; do
 done
 
 # Check for mandatory options
-if [ ! -n "$hostaddress" ] || [ ! -n "$username" ] || [ ! -n "$time_lastcheck" ]; then error_usage; fi
+if [ -z "$hostaddress" ] || [ -z "$username" ] || [ -z "$time_lastcheck" ]; then error_usage; fi
 
 # Check if thresholds are numbers
-if ! [[ $warn_thresh =~ ^[[:digit:]]+$ ]] || ! [[ $warn_thresh =~ ^[[:digit:]]+$ ]]; then error_usage; fi
+if ! [[ "$warn_thresh" =~ ^[[:digit:]]+$ ]] || ! [[ "$crit_thresh" =~ ^[[:digit:]]+$ ]]; then error_usage; fi
 
 #################
 # Sanity checks #

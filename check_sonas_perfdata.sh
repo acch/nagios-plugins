@@ -144,7 +144,7 @@ done
 if [ -z "$hostaddress" ] || [ -z "$username" ] || [ -z "$metric" ] || [ -z "$warn_thresh" ] || [ -z "$crit_thresh" ]; then error_usage; fi
 
 # Check if thresholds are numbers
-if ! [[ "$warn_thresh" =~ ^[[:digit:]]+$ ]] || ! [[ "$warn_thresh" =~ ^[[:digit:]]+$ ]]; then error_usage; fi
+if ! [[ "$warn_thresh" =~ ^[[:digit:]]+$ ]] || ! [[ "$crit_thresh" =~ ^[[:digit:]]+$ ]]; then error_usage; fi
 
 #################
 # Sanity checks #
@@ -237,7 +237,7 @@ do
       # Retrieves the statistics for the % CPU spent for waiting for IO to complete on each of the nodes
     ;;
     "public_network")
-      if [ "$perfdata" == "" ]
+      if [ -z "$perfdata" ]
       then
         # Repeat twice
         repeat=2
@@ -406,7 +406,7 @@ do
       ;;
       "gpfs_throughput")
         # Report on read and write throughput
-        if [ "$perfdata" == "" ]
+        if [ -z "$perfdata" ]
         then
           # First metric - concatenate read performance
           perfdata=" read=${i}B;${warn_thresh};${crit_thresh};0;"
@@ -439,7 +439,7 @@ do
   # Count repeats
   (( repeat -= 1 ))
 
-done # while [ $repeat -gt 0 ]
+done  # while [ $repeat -gt 0 ]
 
 # Cleanup
 rm $tmp_file

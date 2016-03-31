@@ -118,10 +118,10 @@ while getopts 'H:u:F:f:w:c:' OPT; do
 done
 
 # Check for mandatory options
-if [ ! -n "$hostaddress" ] || [ ! -n "$username" ] || [ ! -n "$filesystem" ] || [ ! -n "$fileset" ]; then error_usage; fi
+if [ -z "$hostaddress" ] || [ -z "$username" ] || [ -z "$filesystem" ] || [ -z "$fileset" ]; then error_usage; fi
 
 # Check if thresholds are numbers
-if ! [[ $warn_thresh =~ ^[[:digit:]]+$ ]] || ! [[ $warn_thresh =~ ^[[:digit:]]+$ ]]; then error_usage; fi
+if ! [[ "$warn_thresh" =~ ^[[:digit:]]+$ ]] || ! [[ "$crit_thresh" =~ ^[[:digit:]]+$ ]]; then error_usage; fi
 
 #################
 # Sanity checks #
@@ -141,7 +141,7 @@ then
 fi
 
 # Check if identity file is readable
-if [ ! -r $identity_file ]
+if [ ! -r "$identity_file" ]
 then
   echo "${identity_file} is not readable - please adjust its path!"
   exit 3

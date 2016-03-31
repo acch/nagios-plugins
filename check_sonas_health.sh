@@ -115,7 +115,7 @@ while getopts 'H:u:m:' OPT; do
 done
 
 # Check for mandatory options
-if [ ! -n "$hostaddress" ] || [ ! -n "$username" ] || [ ! -n "$mode" ]; then error_usage; fi
+if [ -z "$hostaddress" ] || [ -z "$username" ] || [ -z "$mode" ]; then error_usage; fi
 
 #################
 # Sanity checks #
@@ -129,7 +129,7 @@ then
 fi
 
 # Check if identity file is readable
-if [ ! -r $identity_file ]
+if [ ! -r "$identity_file" ]
 then
   echo "${identity_file} is not readable - please adjust its path!"
   exit 3

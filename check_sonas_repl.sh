@@ -108,7 +108,7 @@ while getopts 'H:u:F:' OPT; do
 done
 
 # Check for mandatory options
-if [ ! -n "$hostaddress" ] || [ ! -n "$username" ] || [ ! -n "$filesystem" ]; then error_usage; fi
+if [ -z "$hostaddress" ] || [ -z "$username" ] || [ -z "$filesystem" ]; then error_usage; fi
 
 #################
 # Sanity checks #
@@ -122,7 +122,7 @@ then
 fi
 
 # Check if identity file is readable
-if [ ! -r $identity_file ]
+if [ ! -r "$identity_file" ]
 then
   echo "${identity_file} is not readable - please adjust its path!"
   exit 3
@@ -177,7 +177,7 @@ fi
 
 # Check status of last run
 last_status=$(tail -n 1 $tmp_file | cut -d : -f 9)
-if [ $last_status == 'FAILED' ] || [ $last_status == 'STOPPED' ] || [ $last_status == 'KILLED' ]
+if [ "$last_status" == 'FAILED' ] || [ "$last_status" == 'STOPPED' ] || [ "$last_status" == 'KILLED' ]
 then
 
   # Last replication critical
@@ -188,7 +188,7 @@ then
   # Find last successful replication
   output="${output} - Last successful replication at $(grep 'FINISHED' $tmp_file | tail -n 1 | cut -d : -f 11 | sed 's/\./:/g')"
 
-elif [ $last_status == 'WARNING' ]
+elif [ "$last_status" == 'WARNING' ]
 then
 
   # Last replication warning
@@ -196,7 +196,7 @@ then
   return_code=1
   output="Last replication ${last_status} at '$(tail -n 1 $tmp_file | cut -d : -f 11)'"
 
-else
+else  # [ $last_status == 'SUCCESSFUL' ]
 
   # Last replication successful
   output="Last replication ${last_status} at '$(tail -n 1 $tmp_file | cut -d : -f 11)'"
