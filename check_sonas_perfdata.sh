@@ -141,10 +141,10 @@ while getopts 'H:u:m:w:c:' OPT; do
 done
 
 # Check for mandatory options
-if [ ! -n "$hostaddress" ] || [ ! -n "$username" ] || [ ! -n "$metric" ] || [ ! -n "$warn_thresh" ] || [ ! -n "$crit_thresh" ]; then error_usage; fi
+if [ -z "$hostaddress" ] || [ -z "$username" ] || [ -z "$metric" ] || [ -z "$warn_thresh" ] || [ -z "$crit_thresh" ]; then error_usage; fi
 
 # Check if thresholds are numbers
-if ! [[ $warn_thresh =~ ^[[:digit:]]+$ ]] || ! [[ $warn_thresh =~ ^[[:digit:]]+$ ]]; then error_usage; fi
+if ! [[ "$warn_thresh" =~ ^[[:digit:]]+$ ]] || ! [[ "$warn_thresh" =~ ^[[:digit:]]+$ ]]; then error_usage; fi
 
 #################
 # Sanity checks #
@@ -214,7 +214,7 @@ if [ $? -eq 255 ]; then error_login; fi
 # Parse remote command output
 while read line
 do
-  # Remember IP and associated nodename
+  # Remember node's IP and associated name
   nodenames["$(echo $line | cut -d ':' -f 8)"]="$(echo $line | cut -d ':' -f 7)"
 done < $tmp_file
 
@@ -288,7 +288,7 @@ do
   perfdata_raw=$(cat "$tmp_file" | tail -n 1 | cut -d ',' -f 3- | sed 's/,/ /g')
 
   # Check extracted performance data
-  if [ "$perfdata_raw" == "" ]
+  if [ -z "$perfdata_raw" ]
   then
     error_response $(cat "$tmp_file")
   fi
@@ -301,7 +301,12 @@ do
   do
     # Extract node's IP from header
     nodeindx=$(( num_nodes * 2 + 1 ))
-    nodename=${nodenames["$(echo $header_raw | cut -d ',' -f $nodeindx | sed 's/\"//')"]}
+    nodeip=$(echo $header_raw | cut -d ',' -f $nodeindx | sed 's/\"//')
+    if [ -n "$nodeip" ]
+    then
+      # Lookup node's name
+      nodename=${nodenames["$nodeip"]}
+    fi
 
     # Count number of nodes
     (( num_nodes += 1 ))
