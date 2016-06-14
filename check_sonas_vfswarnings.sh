@@ -62,7 +62,7 @@
 #   }
 
 # Version History:
-# 1.0    31.3.2016    Initial Release
+# 1.0    14.6.2016    Initial Release
 
 #####################
 ### Configuration ###
@@ -175,6 +175,7 @@ cmd="grep -e 'WARNING: VFS call.*took unexpectedly long' /var/log/messages"
     \"Permission denied\" { exit 1 }
     \"No route to host\" { exit 1 }
     \"Connection timed out\" { exit 1 }
+    \"Your password has expired\" { exit 1 }
     -nocase \"password\" { send \"$(echo ${password} | openssl base64 -d)\n\"; exp_continue }
   }" &> $tmp_file
 
