@@ -85,7 +85,7 @@
 #   }
 
 # Version History:
-# 1.0    31.3.2016    Initial Release
+# 1.0    14.6.2016    Initial Release
 
 #####################
 ### Configuration ###
@@ -210,7 +210,7 @@ declare -A nodenames
 $rsh "lsnode -v -Y | grep -v HEADER" &> $tmp_file
 
 # Check SSH return code
-if [ $? -eq 255 ]; then error_login; fi
+if [ $? -eq 255 ] || [ $? -eq 1 ]; then error_login; fi
 
 # Parse remote command output
 while read line
@@ -274,7 +274,7 @@ do
   $rsh $query &> $tmp_file
 
   # Check SSH return code
-  if [ $? -eq 255 ]; then error_login; fi
+  if [ $? -eq 255 ] || [ $? -eq 1 ]; then error_login; fi
 
   # Check for performance center errors
   if grep -q 'EFSSG0002I' $tmp_file
