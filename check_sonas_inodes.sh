@@ -61,7 +61,7 @@
 #   }
 
 # Version History:
-# 1.0    31.3.2016    Initial Release
+# 1.0    14.6.2016    Initial Release
 
 #####################
 ### Configuration ###
@@ -182,7 +182,7 @@ fileset_found=0
 $rsh "lsfset ${filesystem} -v -Y | grep -v HEADER" &> $tmp_file
 
 # Check SSH return code
-if [ $? -eq 255 ]; then error_login; fi
+if [ $? -eq 255 ] || [ $? -eq 1 ]; then error_login; fi
 
 # Check for errors
 if grep -q 'EFSSP0010C' $tmp_file
@@ -197,7 +197,7 @@ fi
 while read line
 do
   # Check for specified fileset
-  if [ $(echo "$line" | cut -d : -f 8) == "$fileset" ]
+  if [ "$(echo $line | cut -d : -f 8)" == "$fileset" ]
   then
     # Remember that fileset was found
     fileset_found=1
