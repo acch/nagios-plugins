@@ -26,7 +26,7 @@
 
 # Name:               Check IBM Storwize V7000 Unified / SONAS Health
 # Author:             Achim Christ - achim(dot)christ(at)gmail(dot)com
-# Version:            1.2
+# Version:            1.3
 # Dependencies:       openssh - OpenSSH SSH client (remote login program)
 # Website:            https://github.com/acch/nagios-plugins
 
@@ -67,6 +67,7 @@
 # 1.0    7.12.2012    Initial Release
 # 1.1    28.1.2016    Changed to MIT license, add ConnectTimeout SSH parameter
 # 1.2    10.2.2016    Added check for dependencies
+# 1.3    14.6.2016    Added additional check for SSH return code
 
 #####################
 ### Configuration ###
@@ -163,7 +164,7 @@ case "$mode" in
     $rsh "lshealth -Y | grep -v HEADER" &> $tmp_file
 
     # Check SSH return code
-    if [ $? -eq 255 ]; then error_login; fi
+    if [ $? -eq 255 ] || [ $? -eq 1 ]; then error_login; fi
 
     # Parse remote command output
     while read line
@@ -204,7 +205,7 @@ case "$mode" in
     $rsh "lshealth -i STRG -Y | grep -v HEADER" &> $tmp_file
 
     # Check SSH return code
-    if [ $? -eq 255 ]; then error_login; fi
+    if [ $? -eq 255 ] || [ $? -eq 1 ]; then error_login; fi
 
     # Parse remote command output
     while read line
