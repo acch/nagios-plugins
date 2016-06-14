@@ -169,7 +169,7 @@ case "$mode" in
     # Parse remote command output
     while read line
     do
-      if [ "$(echo "$line" | cut -d : -f 7)" != "V7000" ]  # Ignore V7000 sensors
+      if [ "$(echo $line | cut -d : -f 7)" != "V7000" ]  # Ignore V7000 sensors
       then
         case $(echo "$line" | cut -d : -f 9) in
           OK)  # Sensor OK state -> do nothing
