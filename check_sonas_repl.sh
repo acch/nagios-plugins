@@ -170,7 +170,8 @@ then
   exit 3
 fi
 
-if [ "$(wc -l $tmp_file)" -eq 0 ]
+# Check for replications
+if [ "$(cat $tmp_file | wc -l )" -eq 0 ]
 then
   # No replication for filesystem
   echo "No replication found for ${filesystem}!"
