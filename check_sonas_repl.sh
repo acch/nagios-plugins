@@ -153,10 +153,13 @@ return_status="OK"
 ############################
 
 # Execute remote command
-$rsh "lsrepl ${filesystem} -Y | grep -v HEADER" &> $tmp_file
+$rsh "lsrepl ${filesystem} -Y" &> $tmp_file
 
 # Check SSH return code
-if [ $? -eq 255 ] || [ $? -eq 1 ]; then error_login; fi
+if [ $? -ne 0 ]; then error_login; fi
+
+# Remove header from remote command output
+sed '/HEADER/d' -i $tmp_file
 
 # Check for errors
 if grep -q 'EFSSP0010C' $tmp_file

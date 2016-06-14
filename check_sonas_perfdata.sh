@@ -207,10 +207,13 @@ declare -A nodenames
 #######################
 
 # Execute remote command
-$rsh "lsnode -v -Y | grep -v HEADER" &> $tmp_file
+$rsh "lsnode -v -Y" &> $tmp_file
 
 # Check SSH return code
-if [ $? -eq 255 ] || [ $? -eq 1 ]; then error_login; fi
+if [ $? -ne 0 ]; then error_login; fi
+
+# Remove header from remote command output
+sed '/HEADER/d' -i $tmp_file
 
 # Parse remote command output
 while read line
@@ -230,11 +233,11 @@ do
   query=""
   case "$metric" in
     "cpu_utilization")
-      query="lsperfdata -g cpu_idle_usage -t hour -n all | grep -v 'EFSSG1000I'"
+      query="lsperfdata -g cpu_idle_usage -t hour -n all"
       # Retrieves the statistics for the % of CPU spent idle on each of the nodes
     ;;
     "cpu_iowait")
-      query="lsperfdata -g cpu_iowait_usage -t hour -n all | grep -v 'EFSSG1000I'"
+      query="lsperfdata -g cpu_iowait_usage -t hour -n all"
       # Retrieves the statistics for the % CPU spent for waiting for IO to complete on each of the nodes
     ;;
     "public_network")
@@ -244,16 +247,16 @@ do
         repeat=2
 
         # First repeat
-        query="lsperfdata -g public_network_bytes_received -t hour -n all | grep -v 'EFSSG1000I'"
+        query="lsperfdata -g public_network_bytes_received -t hour -n all"
         # Retrieves the total number of bytes received on all the client network interface of the nodes
       else
         # Second repeat
-        query="lsperfdata -g public_network_bytes_sent -t hour -n all | grep -v 'EFSSG1000I'"
+        query="lsperfdata -g public_network_bytes_sent -t hour -n all"
         # Retrieves the total number of bytes sent on all the client network interface of the nodes
       fi
     ;;
     "gpfs_throughput")
-      query="lsperfdata -g cluster_throughput -t hour | grep -v 'EFSSG1000I'"
+      query="lsperfdata -g cluster_throughput -t hour"
       # Retrieves the number of bytes read and written across all the filesystems on all the nodes of the GPFS cluster
     ;;
 
@@ -274,7 +277,10 @@ do
   $rsh $query &> $tmp_file
 
   # Check SSH return code
-  if [ $? -eq 255 ] || [ $? -eq 1 ]; then error_login; fi
+  if [ $? -ne 0 ]; then error_login; fi
+
+  # Remove success status from remote command output
+  sed '/EFSSG1000I/d' -i $tmp_file
 
   # Check for performance center errors
   if grep -q 'EFSSG0002I' $tmp_file
