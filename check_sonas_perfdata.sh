@@ -76,12 +76,12 @@
 #   define service{
 #     host_name            <your_system>
 #     service_description  NETWORK Throughput
-#     check_command        check_sonas_perfdata!nagios!public_network!10000000!20000000
+#     check_command        check_sonas_perfdata!nagios!public_network!100000000!200000000
 #   }
 #   define service{
 #     host_name            <your_system>
 #     service_description  GPFS Throughput
-#     check_command        check_sonas_perfdata!nagios!gpfs_throughput!10000000!20000000
+#     check_command        check_sonas_perfdata!nagios!gpfs_throughput!100000000!200000000
 #   }
 #   define service{
 #     host_name            <your_system>
