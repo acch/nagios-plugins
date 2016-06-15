@@ -110,6 +110,8 @@ error_usage () {
   echo "  cpu_iowait        [%]"
   echo "  public_network    [Bps]"
   echo "  gpfs_throughput   [Bps]"
+  echo "  operations        [ops]"
+  echo "  latency           [ms]"
   exit 3
 }
 
@@ -259,15 +261,41 @@ do
       query="lsperfdata -g cluster_throughput -t hour"
       # Retrieves the number of bytes read and written across all the filesystems on all the nodes of the GPFS cluster
     ;;
+    "operations")
+      if [ -z "$perfdata" ]
+      then
+        # Repeat twice
+        repeat=2
+
+        # First repeat
+        query="lsperfdata -g cluster_open_close_operations -t hour"
+        # Retrieves the number of file open and close operations across all the filesystems on all the nodes of the GPFS cluster
+      else
+        # Second repeat
+        query="lsperfdata -g cluster_read_write_operations -t hour"
+        # Retrieves the number of file read and write operations across all the filesystems on all the nodes of the GPFS cluster
+      fi
+    ;;
+    "latency")
+      if [ -z "$perfdata" ]
+      then
+        # Repeat twice
+        repeat=2
+
+        # First repeat
+        query="lsperfdata -g cluster_open_close_latency -t hour"
+        # Retrieves the latency of file open and close operations across all the filesystems on all the nodes of the GPFS cluster
+      else
+        # Second repeat
+        query="lsperfdata -g cluster_read_write_latency -t hour"
+        # Retrieves the latency of file read and write operations across all the filesystems on all the nodes of the GPFS cluster
+      fi
+    ;;
 
     # Also available:
     # client_throughput                Retrieves the total bytes received and total bytes sent across all the client network interface on all the interface nodes. Timeperiod is the only parameter for this graph.
     # cluster_create_delete_latency    Retrieves the latency of the file create and delete operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
     # cluster_create_delete_operations Retrieves the number of file create and delete operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
-    # cluster_open_close_latency       Retrieves the latency of file open and close operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
-    # cluster_open_close_operations    Retrieves the number of file open and close operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
-    # cluster_read_write_latency       Retrieves the latency of file read and write operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
-    # cluster_read_write_operations    Retrieves the number of file read and write operations across all the filesystems on all the nodes of the GPFS cluster. Timeperiod is the only mandatory parameter for this graph.
 
     # Check not implemented
     *) error_usage ;;
@@ -340,7 +368,7 @@ do
         #output=$(echo "${sum_metric}/${num_nodes}" | bc)
         #output="Max. CPU utilization ${output}%"
 
-        # Check if utilization is above threshold
+        # Check if metric is above threshold
         if [ $(echo "${utilization}>=${crit_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 2 ]
         then
           return_code=2
@@ -372,7 +400,7 @@ do
         #output=$(echo "${sum_metric}/${num_nodes}" | bc)
         #output="Max. IO wait ${output}%"
 
-        # Check if utilization is above threshold
+        # Check if metric is above threshold
         if [ $(echo "${i}>=${crit_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 2 ]
         then
           return_code=2
@@ -391,13 +419,13 @@ do
         if [ "$repeat" -eq 2 ]
         then
           # First repeat - concatenate receive performance per node
-          perfdata="${perfdata} ${nodename}_received=${i}B;${warn_thresh};${crit_thresh};0;"
+          perfdata="${perfdata} ${nodename}_received=${i}B/s;${warn_thresh};${crit_thresh};0;"
 
           # Sum up throughput for output
           count_metric_1=$(echo "${count_metric_1}+${i}" | bc)
         else
           # Second repeat - concatenate send performance per node
-          perfdata="${perfdata} ${nodename}_sent=${i}B;${warn_thresh};${crit_thresh};0;"
+          perfdata="${perfdata} ${nodename}_sent=${i}B/s;${warn_thresh};${crit_thresh};0;"
 
           # Sum up throughput for output
           count_metric_2=$(echo "${count_metric_2}+${i}" | bc)
@@ -406,7 +434,7 @@ do
         # Produce output
         output="Total received $(echo "scale=2; ${count_metric_1}/1024/1024" | bc) MB/s sent $(echo "scale=2; ${count_metric_2}/1024/1024" | bc) MB/s"
 
-        # Check if throughput is above threshold
+        # Check if metric is above threshold
         if [ $(echo "${i}>=${crit_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 2 ]
         then
           return_code=2
@@ -425,19 +453,19 @@ do
         if [ -z "$perfdata" ]
         then
           # First metric - concatenate read performance
-          perfdata=" read=${i}B;${warn_thresh};${crit_thresh};0;"
+          perfdata=" read=${i}B/s;${warn_thresh};${crit_thresh};0;"
 
           # Produce output
           output="Total read $(echo "scale=2; ${i}/1024/1024" | bc) MB/s"
         else
           # Second metric - concatenate write performance
-          perfdata="${perfdata} write=${i}B;${warn_thresh};${crit_thresh};0;"
+          perfdata="${perfdata} write=${i}B/s;${warn_thresh};${crit_thresh};0;"
 
           # Produce output
           output="${output} write $(echo "scale=2; ${i}/1024/1024" | bc) MB/s"
         fi
 
-        # Check if throughput is above threshold
+        # Check if metric is above threshold
         if [ $(echo "${i}>=${crit_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 2 ]
         then
           return_code=2
@@ -450,6 +478,59 @@ do
 
         # Report metric in output
         return_metric="GPFS"
+      ;;
+      "operations")
+        # Report on open/close and read/write operations
+        if [ "$repeat" -eq 2 ]
+        then
+          # First repeat - open/close operations
+          if [ -z "$perfdata" ]
+          then
+            # First metric - concatenate open operations
+            perfdata=" open=${i}OP/s;${warn_thresh};${crit_thresh};0;"
+
+            # Produce output
+            output="Total open $(echo "scale=2; ${i}" | bc) OP/s"
+          else
+            # Second metric - concatenate close operations
+            perfdata="${perfdata} close=${i}OP/s;${warn_thresh};${crit_thresh};0;"
+
+            # Produce output
+            output="${output} close $(echo "scale=2; ${i}" | bc) OP/s"
+          fi
+        else
+          # Second repeat - read/write operations
+          if [ "$count_metric_1" -eq 0 ]
+          then
+            count_metric_1=1
+
+            # First metric - concatenate read operations
+            perfdata="${perfdata} read=${i}OP/s;${warn_thresh};${crit_thresh};0;"
+
+            # Produce output
+            output="${output} read $(echo "scale=2; ${i}" | bc) OP/s"
+          else
+            # Second metric - concatenate write operations
+            perfdata="${perfdata} write=${i}OP/s;${warn_thresh};${crit_thresh};0;"
+
+            # Produce output
+            output="${output} write $(echo "scale=2; ${i}" | bc) OP/s"
+          fi
+        fi
+
+        # Check if metric is above threshold
+        if [ $(echo "${i}>=${crit_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 2 ]
+        then
+          return_code=2
+          return_status="CRITICAL"
+        elif [ $(echo "${i}>=${warn_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 1 ]
+        then
+          return_code=1
+          return_status="WARNING"
+        fi
+
+        # Report metric in output
+        return_metric="OPERATIONS"
       ;;
     esac
 
