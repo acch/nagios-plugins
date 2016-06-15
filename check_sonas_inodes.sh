@@ -180,9 +180,10 @@ fileset_found=0
 
 # Execute remote command
 $rsh "lsfset ${filesystem} -v -Y" &> $tmp_file
+RC=$?
 
 # Check SSH return code
-if [ $? -ne 0 ]; then error_login; fi
+if [ "$RC" -ne 0 ] && [ "$RC" -ne 9 ]; then error_login; fi
 
 # Remove header from remote command output
 sed '/HEADER/d' -i $tmp_file
