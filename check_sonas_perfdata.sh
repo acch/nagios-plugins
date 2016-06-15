@@ -83,9 +83,19 @@
 #     service_description  GPFS Throughput
 #     check_command        check_sonas_perfdata!nagios!gpfs_throughput!10000000!20000000
 #   }
+#   define service{
+#     host_name            <your_system>
+#     service_description  GPFS Operations
+#     check_command        check_sonas_perfdata!nagios!operations!100000!200000
+#   }
+#   define service{
+#     host_name            <your_system>
+#     service_description  GPFS Latency
+#     check_command        check_sonas_perfdata!nagios!latency!100!200
+#   }
 
 # Version History:
-# 1.0    14.6.2016    Initial Release
+# 1.0    15.6.2016    Initial Release
 
 #####################
 ### Configuration ###
