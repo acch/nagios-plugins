@@ -490,13 +490,13 @@ do
             perfdata=" open=${i}OP/s;${warn_thresh};${crit_thresh};0;"
 
             # Produce output
-            output="Total open $(echo "scale=2; ${i}" | bc) OP/s"
+            output="Total open $(echo "scale=2; ${i}/1" | bc) OP/s"
           else
             # Second metric - concatenate close operations
             perfdata="${perfdata} close=${i}OP/s;${warn_thresh};${crit_thresh};0;"
 
             # Produce output
-            output="${output} close $(echo "scale=2; ${i}" | bc) OP/s"
+            output="${output} close $(echo "scale=2; ${i}/1" | bc) OP/s"
           fi
         else
           # Second repeat - read/write operations
@@ -508,13 +508,13 @@ do
             perfdata="${perfdata} read=${i}OP/s;${warn_thresh};${crit_thresh};0;"
 
             # Produce output
-            output="${output} read $(echo "scale=2; ${i}" | bc) OP/s"
+            output="${output} read $(echo "scale=2; ${i}/1" | bc) OP/s"
           else
             # Second metric - concatenate write operations
             perfdata="${perfdata} write=${i}OP/s;${warn_thresh};${crit_thresh};0;"
 
             # Produce output
-            output="${output} write $(echo "scale=2; ${i}" | bc) OP/s"
+            output="${output} write $(echo "scale=2; ${i}/1" | bc) OP/s"
           fi
         fi
 
@@ -531,6 +531,59 @@ do
 
         # Report metric in output
         return_metric="OPERATIONS"
+      ;;
+      "latency")
+        # Report on open/close and read/write latency
+        if [ "$repeat" -eq 2 ]
+        then
+          # First repeat - open/close latency
+          if [ -z "$perfdata" ]
+          then
+            # First metric - concatenate open latency
+            perfdata=" open=${i}ms;${warn_thresh};${crit_thresh};0;"
+
+            # Produce output
+            output="Total open $(echo "scale=2; ${i}/1" | bc) ms"
+          else
+            # Second metric - concatenate close latency
+            perfdata="${perfdata} close=${i}ms;${warn_thresh};${crit_thresh};0;"
+
+            # Produce output
+            output="${output} close $(echo "scale=2; ${i}/1" | bc) ms"
+          fi
+        else
+          # Second repeat - read/write latency
+          if [ "$count_metric_1" -eq 0 ]
+          then
+            count_metric_1=1
+
+            # First metric - concatenate read latency
+            perfdata="${perfdata} read=${i}ms;${warn_thresh};${crit_thresh};0;"
+
+            # Produce output
+            output="${output} read $(echo "scale=2; ${i}/1" | bc) ms"
+          else
+            # Second metric - concatenate write latency
+            perfdata="${perfdata} write=${i}ms;${warn_thresh};${crit_thresh};0;"
+
+            # Produce output
+            output="${output} write $(echo "scale=2; ${i}/1" | bc) ms"
+          fi
+        fi
+
+        # Check if metric is above threshold
+        if [ $(echo "${i}>=${crit_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 2 ]
+        then
+          return_code=2
+          return_status="CRITICAL"
+        elif [ $(echo "${i}>=${warn_thresh}" | bc) -eq 1 ] && [ "$return_code" -lt 1 ]
+        then
+          return_code=1
+          return_status="WARNING"
+        fi
+
+        # Report metric in output
+        return_metric="LATENCY"
       ;;
     esac
 
