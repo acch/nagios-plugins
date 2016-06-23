@@ -61,8 +61,11 @@
 #     check_command        check_sonas_vfswarnings!nagios
 #   }
 
+# Note on usage via NRPE:
+# This plugin may potentially run longer than other plugins. If you run this plugin on a remote machine via NRPE, remember that NRPE has a default timeout of 10 seconds. It is recommended to raise this value to 30 seconds for running this plugin. To do so, add the '-t 30' parameter to the check command in /etc/nagios/nrpe.cfg.
+
 # Version History:
-# 1.0    14.6.2016    Initial Release
+# 1.0    23.6.2016    Initial Release
 
 #####################
 ### Configuration ###
