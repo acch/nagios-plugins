@@ -92,16 +92,16 @@ return_status="OK"
 # Read temperature information
 cpu=$(</sys/class/thermal/thermal_zone0/temp)
 gpu=$(/opt/vc/bin/vcgencmd measure_temp | sed -e "s/temp=//" -e "s/'C//")
-printf -v gpuint %.0f $gpu  # Round GPU temperature to integer
+printf -v gpuint %.0f "$gpu"  # Round GPU temperature to integer
 
 # Check for errors
-if [ $cpu -gt $(($crit_thresh*1000)) ] || [ $gpuint -gt $crit_thresh ]
+if [ "$cpu" -gt $((crit_thresh*1000)) ] || [ "$gpuint" -gt "$crit_thresh" ]
 then
   # Temperature above critical threshold
   return_code=2
   return_status="CRITICAL"
 # Check for warnings
-elif [ $cpu -gt $(($warn_thresh*1000)) ] || [ $gpuint -gt $crit_thresh ]
+elif [ "$cpu" -gt $((warn_thresh*1000)) ] || [ "$gpuint" -gt "$crit_thresh" ]
 then
   # Temperature above warning threshold
   return_code=1

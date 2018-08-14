@@ -74,13 +74,13 @@ mem_crit=$(grep privvmpages /proc/user_beancounters | awk '{print $4}')
 mem_max=$(grep privvmpages /proc/user_beancounters | awk '{print $5}')
 
 # Check for errors
-if [ $mem_actual -gt $mem_crit ]
+if [ "$mem_actual" -gt "$mem_crit" ]
 then
   # Memory above critical threshold
   retcode=2
   msg="CRITICAL"
 # Check for warnings
-elif [ $mem_actual -gt $mem_warn ]
+elif [ "$mem_actual" -gt "$mem_warn" ]
 then
   # Memory above warning threshold
   retcode=1
